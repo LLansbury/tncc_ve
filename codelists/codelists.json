@@ -167,6 +167,12 @@
       "url": "https://codelists.opensafely.org/codelist/opensafely/temporary-immunosuppression/2020-04-24/",
       "downloaded_at": "2021-01-18 11:45:44.702418Z",
       "sha": "99f6c0787e17e16430549a4cfb5084612faba2ac"
+    },
+    "opensafely-diabetes-snomed.csv": {
+      "id": "opensafely/diabetes-snomed/2020-04-15",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/diabetes-snomed/2020-04-15/",
+      "downloaded_at": "2021-06-14 15:17:15.265642Z",
+      "sha": "c255576081fb4ee8c4daf71445d54b0f1ef0a10e"
     }
   }
 }

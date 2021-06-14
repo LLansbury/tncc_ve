@@ -10,7 +10,7 @@ from cohortextractor import (
 
 # Important Dates
 campaign_start = "2020-12-07" # the day before vaccines were rolled-out in England
-latest_date = "2021-01-13" # change this when more data become available - see https://github.com/opensafely/database-notebooks/blob/master/notebooks/database-builds.ipynb
+latest_date = "2021-06-08" # change this when more data become available - see https://github.com/opensafely/database-notebooks/blob/master/notebooks/database-builds.ipynb
 
 # Import Codelists
 from codelists import *
@@ -508,6 +508,21 @@ study = StudyDefinition(
             "rate": "exponential_increase",
         },
     ),
+
+    # FIRST SGSS NEGATIVE DURING STUDY
+    negative_test_result_1_date=patients.with_test_result_in_sgss(
+        pathogen="SARS-CoV-2",
+        test_result="negative",
+        on_or_after="index_date + 1 day",
+        find_first_match_in_period=True,
+        returning="date",
+        date_format="YYYY-MM-DD",
+        return_expectations={
+            "date": {"earliest": "2021-01-01"},
+            "rate": "exponential_increase",
+        },
+    ),
+
     # FIRST PRIMARY CARE CASE IDENTIFICATION DURING STUDY    
     primary_care_covid_case_1_date=patients.with_these_clinical_events(
         combine_codelists(
@@ -572,27 +587,27 @@ study = StudyDefinition(
         chronic_cardiac_disease_codes,
         on_or_before="index_date",
         returning="binary_flag",
-        return_expectations={"incidence": 0.01},
+        return_expectations={"incidence": 0.07, },
     ),
     current_copd=patients.with_these_clinical_events(
         current_copd_codes,
         on_or_before="index_date",
         returning="binary_flag",
-        return_expectations={"incidence": 0.01, },
+        return_expectations={"incidence": 0.04, },
     ),
     # on a dmard - indicative of immunosuppression
     dmards=patients.with_these_medications(
         dmards_codes,
         on_or_before="index_date",
         returning="binary_flag",
-        return_expectations={"incidence": 0.01, },
+        return_expectations={"incidence": 0.05, },
     ),
     # dementia
     dementia=patients.with_these_clinical_events(
         dementia_codes,
         on_or_before="index_date",
         returning="binary_flag",
-        return_expectations={"incidence": 0.01, },
+        return_expectations={"incidence": 0.02, },
     ),
     dialysis=patients.with_these_clinical_events(
         dialysis_codes,
@@ -679,8 +694,17 @@ study = StudyDefinition(
         asplenia_codes,
         on_or_before="index_date",
         returning="binary_flag",
-        return_expectations={"incidence": 0.01, },
+        return_expectations={"incidence": 0.002, },
     ),
+
+    # diabetes
+    diabetes=patients.with_these_clinical_events(
+        diabetes_snomed_codes,
+        on_or_before="index_date",
+        returning="binary_flag",
+        return_expectations={"incidence":0.07, },
+        
+    )
 
 
 )
