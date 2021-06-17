@@ -698,13 +698,32 @@ study = StudyDefinition(
     ),
 
     # diabetes
-    diabetes=patients.with_these_clinical_events(
-        diabetes_snomed_codes,
+    diabetes_type_1=patients.with_these_clinical_events(
+        type_1_diabetes_codes,
+        on_or_before="index_date",
+        returning="binary_flag",
+        return_expectations={"incidence":0.01, },
+        
+    ),
+
+    diabetes_type_2=patients.with_these_clinical_events(
+        type_2_diabetes_codes,
         on_or_before="index_date",
         returning="binary_flag",
         return_expectations={"incidence":0.07, },
-        
-    )
+
+    ),
+
+    diabetes_unknown_type=patients.with_these_clinical_events(
+        diabetes_unknown_type_codes,
+        on_or_before="index_date",
+        returning="binary_flag",
+        return_expectations={"incidence": 0.01 },
+
+       
+    ),
+
+
 
 
 )
