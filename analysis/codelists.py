@@ -146,14 +146,14 @@ psychosis_schizophrenia_bipolar_affective_disease_codes = codelist_from_csv(
 asplenia_codes = codelist_from_csv(
     "codelists/opensafely-asplenia.csv", system="ctv3", column="CTV3ID"
 )
-
-diabetes_type_1_codes = codelist_from_csv(
+type_1_diabetes_codes = codelist_from_csv(
     "codelists/opensafely-type-1-diabetes.csv",
     system="ctv3",
     column="CTV3ID",
 )
 
-diabetes_type_2_codes = codelist_from_csv(
+
+type_2_diabetes_codes = codelist_from_csv(
     "codelists/opensafely-type-2-diabetes.csv",
     system="ctv3",
     column="CTV3ID",
