@@ -274,7 +274,7 @@ study = StudyDefinition(
         return_expectations={
             "date": {
                 "earliest": "2020-12-08",  # first vaccine administered on the 8/12
-                "latest": "2021-01-01",
+                "latest": "2021-06-08",
             }
         },
     ),
@@ -288,7 +288,7 @@ study = StudyDefinition(
         return_expectations={
             "date": {
                 "earliest": "2020-12-29",  # first reported second dose administered on the 29/12
-                "latest": "2021-01-31",
+                "latest": "2021-06-08",
             }
         },
     ),
@@ -302,7 +302,7 @@ study = StudyDefinition(
         return_expectations={
             "date": {
                 "earliest": "2020-12-29",  # first reported second dose administered on the 29/12
-                "latest": "2021-01-31",
+                "latest": "2021-06-08",
             }
         },
     ),
@@ -316,7 +316,7 @@ study = StudyDefinition(
         return_expectations={
             "date": {
                 "earliest": "2020-12-29",  # first reported second dose administered on the 29/12
-                "latest": "2021-01-31",
+                "latest": "2021-06-08",
             }
         },
     ),
@@ -334,7 +334,7 @@ study = StudyDefinition(
         return_expectations={
             "date": {
                 "earliest": "2020-12-08",  # first vaccine administered on the 8/12
-                "latest": "2021-01-01",
+                "latest": "2021-06-08",
             }
         },
     ),
@@ -349,7 +349,7 @@ study = StudyDefinition(
         return_expectations={
             "date": {
                 "earliest": "2020-12-29",  # first reported second dose administered on the 29/12
-                "latest": "2021-02-01",
+                "latest": "2021-06-08",
             }
         },
     ),
@@ -364,7 +364,7 @@ study = StudyDefinition(
         return_expectations={
             "date": {
                 "earliest": "2020-12-29",  # first reported second dose administered on the 29/12
-                "latest": "2021-02-01",
+                "latest": "2021-06-08",
             }
         },
     ),
@@ -379,7 +379,7 @@ study = StudyDefinition(
         return_expectations={
             "date": {
                 "earliest": "2020-12-29",  # first reported second dose administered on the 29/12
-                "latest": "2021-02-01",
+                "latest": "2021-06-08",
             }
         },
     ),
@@ -397,7 +397,7 @@ study = StudyDefinition(
         return_expectations={
             "date": {
                 "earliest": "2021-01-04",  # first vaccine administered on the 4/1
-                "latest": "2021-02-01",
+                "latest": "2021-06-08",
             }
         },
     ),
@@ -412,7 +412,7 @@ study = StudyDefinition(
         return_expectations={
             "date": {
                 "earliest": "2021-02-01",
-                "latest": "2021-03-01",
+                "latest": "2021-06-08",
             }
         },
     ),
@@ -427,7 +427,7 @@ study = StudyDefinition(
         return_expectations={
             "date": {
                 "earliest": "2021-03-02",  
-                "latest": "2021-04-01",
+                "latest": "2021-06-08",
             }
         },
     ),
@@ -442,7 +442,7 @@ study = StudyDefinition(
         return_expectations={
             "date": {
                 "earliest": "2021-04-02",  
-                "latest": "2021-05-01",
+                "latest": "2021-06-08",
             }
         },
     ),
@@ -535,7 +535,7 @@ study = StudyDefinition(
         date_format="YYYY-MM-DD",
         on_or_after="index_date + 1 day",
         return_expectations={
-            "date": {"earliest": "2021-04-01", "latest" : "2021-05-01"},
+            "date": {"earliest": "2021-01-01", "latest" : "2021-06-08"},
             "rate": "uniform",
             "incidence": 0.05,
         },
@@ -548,7 +548,7 @@ study = StudyDefinition(
         date_format="YYYY-MM-DD",
         find_first_match_in_period=True,
         return_expectations={
-            "date": {"earliest": "2021-05-01", "latest" : "2021-06-01"},
+            "date": {"earliest": "2021-01-01", "latest" : "2021-06-08"},
             "rate": "uniform",
             "incidence": 0.05,
         },
@@ -560,7 +560,7 @@ study = StudyDefinition(
         returning="date_of_death",
         date_format="YYYY-MM-DD",
         return_expectations={
-            "date": {"earliest": "2021-06-01", "latest" : "2021-08-01"},
+            "date": {"earliest": "2021-01-01", "latest" : "2021-08-01"},
             "rate": "uniform",
             "incidence": 0.02
         },
@@ -570,7 +570,7 @@ study = StudyDefinition(
         returning="date_of_death",
         date_format="YYYY-MM-DD",
         return_expectations={
-            "date": {"earliest": "2021-06-01", "latest" : "2021-08-01"},
+            "date": {"earliest": "2021-01-01", "latest" : "2021-08-01"},
             "rate": "uniform",
             "incidence": 0.02
         },
@@ -702,7 +702,7 @@ study = StudyDefinition(
         type_1_diabetes_codes,
         on_or_before="index_date",
         returning="binary_flag",
-        return_expectations={"incidence":0.01, },
+        return_expectations={"incidence": 0.01, },
         
     ),
 
@@ -710,7 +710,7 @@ study = StudyDefinition(
         type_2_diabetes_codes,
         on_or_before="index_date",
         returning="binary_flag",
-        return_expectations={"incidence":0.07, },
+        return_expectations={"incidence": 0.07, },
 
     ),
 
