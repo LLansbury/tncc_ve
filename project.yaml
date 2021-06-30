@@ -6,15 +6,14 @@ expectations:
 actions:
 
   generate_study_population:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition --output-dir=output/cohorts
+    run: cohortextractor:latest generate_cohort --study-definition study_definition
     outputs:
       highly_sensitive:
         cohort: output/input.csv
 
   run_model:
-    run: stata-mp:latest analysis/model.do
+    run: stata-mp:latest analysis/00a_cr_create_analysis_dataset.do
     needs: [generate_study_population]
     outputs:
       moderately_sensitive:
-        log: logs/model.log
-
+        log: logs/00a_cr_create_analysis_dataset.txt
