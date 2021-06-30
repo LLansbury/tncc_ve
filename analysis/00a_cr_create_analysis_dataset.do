@@ -17,14 +17,14 @@ OTHER OUTPUT: 			logfiles, printed to folder analysis/$logdir
 * Open a log file
 
 ** this is the pathname they use in their file- which does not quite help me on the pathname for you filr tr[p
-log using $logdir\00a_cr_create_analysis_dataset, replace t
+log using logs/00a_cr_create_analysis_dataset.txt, replace t
 
 
 
 
 //importing data
 
-import delimited "/Users/mszlel/Documents/GitHub/tncc_ve/output/input.csv"
+import delimited "output/input.csv"
 
 rename prior_primary_care_covid_case_da prior_pc_covid_case_date
 
