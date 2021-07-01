@@ -184,7 +184,7 @@ logistic   pd1t2 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region
 
 
 logistic   pd1t1 covid2 if chemo_or_radio==1
-logistic   pd1t1 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region2 i.imd if chemo_or_radion==1
+logistic   pd1t1 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region2 i.imd if chemo_or_radio==1
 logistic   pd1t2 covid2  if solid_organ_transplantation==1
 logistic   pd1t2 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region2 i.imd if chemo_or_radio==1
 
@@ -196,7 +196,7 @@ logistic   pd1t2 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region
 
 
 logistic   pd1t1 covid2 if chemo_or_radio==1  & ageg==4
-logistic   pd1t1 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region2 i.imd if chemo_or_radion==1  & ageg==4
+logistic   pd1t1 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region2 i.imd if chemo_or_radio==1  & ageg==4
 logistic   pd1t2 covid2  if solid_organ_transplantation==1  & ageg==4
 logistic   pd1t2 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region2 i.imd if chemo_or_radio==1  & ageg==4
 
@@ -208,7 +208,7 @@ logistic   pd1t2 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region
 
 
 logistic   pd1t1 covid2 if chemo_or_radio==1  & ageg==3
-logistic   pd1t1 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region2 i.imd if chemo_or_radion==1  & ageg==3
+logistic   pd1t1 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region2 i.imd if chemo_or_radio==1  & ageg==3
 logistic   pd1t2 covid2  if solid_organ_transplantation==1  & ageg==3
 logistic   pd1t2 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region2 i.imd if chemo_or_radio==1  & ageg==3
 
