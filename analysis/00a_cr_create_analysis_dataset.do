@@ -16,7 +16,7 @@ OTHER OUTPUT: 			logfiles, printed to folder analysis/$logdir
 
 * Open a log file
 
-** this is the pathname they use in their file- which does not quite help me on the pathname for you filr tr[p
+
 log using logs/00a_cr_create_analysis_dataset.txt, replace t
 
 
@@ -61,6 +61,9 @@ recode covid2 .=0 if nocovid==1
 
 gen testtime = positive_test_1_date2-negative_test_result_1_date2
 
+recode testtime -21/20=0
+recode nocovid 1=. if testtime==0
+
 //early summary of data
 summ age, detail
 
@@ -81,19 +84,35 @@ gen pfizerd2 = covid_vax_pfizer_2_date2
 recode pfizerd2 min/max=1
 
 
-//time between covid test date and pfizer vaccine
-gen timevacpfizerd1 = positive_test_1_date2-covid_vax_pfizer_1_date2
-recode timevacpfizerd1 0/20=1 21/max=2
-tab timevacpfizerd1
+//time between pfizer vaccine dose 1 and either a positive or negative test_7july
+gen timevacpfd1neg = negative_test_result_1_date2-covid_vax_pfizer_1_date2
+recode timevacpfd1neg 0/20=1 21/max=2
+recode timevacpfd1neg min/-1=.
+tab timevacpfd1neg
 
-/* As there were negative values remaining after the recoding due to being vaccinated after testing positive I have recoded these to missing values (ie unvaccinated at time of pos test)*/
+gen timevacpfd1pos = positive_test_1_date2-covid_vax_pfizer_1_date2
+recode timevacpfd1pos 0/20=1 21/max=2
+recode timevacpfd1pos min/-1=.
+tab timevacpfd1pos
 
-recode timevacpfizerd1 min/-1=.
+gen timevacpfizerd1=timevacpfd1pos
+recode timevacpfizerd1 .=1 if timevacpfd1neg==1
+recode timevacpfizerd1 .=2 if timevacpfd1neg==2
 
-gen timevacpfizerd2 = positive_test_1_date2- covid_vax_pfizer_2_date2
-recode timevacpfizerd2 0/13=1 14/max=2
-tab timevacpfizerd2
-recode timevacpfizerd2 min/-1=.
+//time between pfizer vaccine dose 2 and either a positive or negative test_7july
+gen timevacpfd2neg = negative_test_result_1_date2-covid_vax_pfizer_2_date2
+recode timevacpfd2neg 0/13=1 14/max=2
+recode timevacpfd2neg min/-1=.
+tab timevacpfd2neg
+
+gen timevacpfd2pos = positive_test_1_date2-covid_vax_pfizer_2_date2
+recode timevacpfd2pos 0/13=1 14/max=2
+recode timevacpfd2pos min/-1=.
+tab timevacpfd2pos
+
+gen timevacpfizerd2=timevacpfd2pos
+recode timevacpfizerd2 .=1 if timevacpfd2neg==1
+recode timevacpfizerd2 .=2 if timevacpfd2neg==2
 
 //** AZ VACCINE doses 1 and 2 (LL added)
 
@@ -103,38 +122,54 @@ recode azd1 min/max=1
 gen azd2 = covid_vax_az_2_date2
 recode azd2 min/max=1
 
+//time between AZ vaccine dose 1 and either a positive or negative test_7july
+gen timevacazd1neg = negative_test_result_1_date2-covid_vax_az_1_date2
+recode timevacazd1neg 0/20=1 21/max=2
+recode timevacazd1neg min/-1=.
+tab timevacazd1neg
 
-//time between covid test date and pfizer vaccine
-gen timevacazd1 = positive_test_1_date2-covid_vax_az_1_date2
-recode timevacazd1 0/20=1 21/max=2
+gen timevacazd1pos = positive_test_1_date2-covid_vax_az_1_date2
+recode timevacazd1pos 0/20=1 21/max=2
+recode timevacazd1pos min/-1=.
+tab timevacazd1pos
+
+gen timevacazd1=timevacazd1pos
+recode timevacazd1 .=1 if timevacazd1neg==1
+recode timevacazd1 .=2 if timevacazd1neg==2
 tab timevacazd1
 
-/* As there were negative values remaining after the recoding due to being vaccinated after testing positive I have recoded these to missing values (ie unvaccinated at time of pos test)*/
+//time between AZ vaccine dose 2 and either a positive or negative test_7july
+gen timevacazd2neg = negative_test_result_1_date2-covid_vax_az_2_date2
+recode timevacazd2neg 0/13=1 14/max=2
+recode timevacazd2neg min/-1=.
+tab timevacazd2neg
 
-recode timevacazd1 min/-1=.
+gen timevacazd2pos = positive_test_1_date2-covid_vax_az_2_date2
+recode timevacazd2pos 0/13=1 14/max=2
+recode timevacazd2pos min/-1=.
+tab timevacazd2pos
 
-gen timevacazd2 = positive_test_1_date2- covid_vax_az_2_date2
-recode timevacazd2 0/13=1 14/max=2
+gen timevacazd2=timevacazd2pos
+recode timevacazd2 .=1 if timevacazd2neg==1
+recode timevacazd2 .=2 if timevacazd2neg==2
 tab timevacazd2
-recode timevacazd2 min/-1=.
 
-**/ If we drop novaccine==2, everyone left will be coded as 1, regardless of whether vaccinated or not. Therefore I have generated code 0 for people who have received 1 or 2 doses of either Pfizer or AZ
 
+//to get unvaccinated people (1=unvaccinated, 0=vaccinated)
 gen novaccine=1
-recode novaccine 1=0 if pfizerd1==1|pfizerd2==1|azd1==1|azd2==1
+recode novaccine 1=0 if timevacpfizerd1==1|timevacpfizerd2==1|timevacazd1==1|timevacazd2==1|timevacpfizerd1==2|timevacpfizerd2==2|timevacazd1==2|timevacazd2==2
 recode novaccine 0=2 if covid_vax_pfizer_1_date2>positive_test_1_date2
-recode novaccine 0=2 if covid_vax_pfizer_1_date2 > negative_test_result_1_date2
 recode novaccine 0=2 if covid_vax_az_1_date2 > positive_test_1_date2
-recode novaccine 0=2 if covid_vax_az_1_date2 > negative_test_result_1_date2
 
 
 gen pd1t1 = timevacpfizerd1
 recode pd1t1 2=.
 recode pd1t1 .=0 if novaccine==1
+tab pd1t1
 
 gen pd1t2 = timevacpfizerd1
 recode pd1t2 1=. 
-recode pd1t2 .=0 if novaccin==1
+recode pd1t2 .=0 if novaccine==1
 recode pd1t2 2=1
 tab pd1t2
 
@@ -151,11 +186,6 @@ recode pd2t2 2=1
 tab pd2t2
 
 
-
-
-
-
-
 // vaccine % and univariate analysis //- by age group, any type, d1, d2- grousp 0-20- 21+ and D2 14+ and time period before janry 8th and after
 		
 local desc2 "pd1t1 pd1t2 pd2t1 pd2t2 sex2 bmi2 carehome has_follow_up_previous_year  ethnicity region2 imd chronic_cardiac_disease diabetes_type_1 diabetes_type_2 diabetes_unknown_type current_copd dmards dementia dialysis solid_organ_transplantation chemo_or_radio intel_dis_incl_downs_syndrome lung_cancer cancer_excl_lung_and_haem haematological_cancer bone_marrow_transplant cystic_fibrosis sickle_cell_disease permanant_immunosuppression temporary_immunosuppression psychosis_schiz_bipolar asplenia"
@@ -165,51 +195,66 @@ tab `var' covid2, col
 mhodds  covid2 `var'
 }	
 
+local desc3 "carehome chronic_cardiac_disease diabetes_type_1 diabetes_type_2 diabetes_unknown_type current_copd dmards dementia dialysis solid_organ_transplantation chemo_or_radio intel_dis_incl_downs_syndrome lung_cancer cancer_excl_lung_and_haem haematological_cancer bone_marrow_transplant cystic_fibrosis sickle_cell_disease permanant_immunosuppression temporary_immunosuppression psychosis_schiz_bipolar asplenia "
+
+foreach var of local desc3 {
+tab `var'
+tab pd1t1 covid2 if `var'==1, col
+logistic pd1t1 covid2 if `var'==1
+
+tab pd1t2 covid2 if `var'==1, col
+logistic pd1t2 covid2 if `var'==1
+
+tab pd2t1 covid2 if `var'==1, col
+logistic pd2t1 covid2 if `var'==1
+
+tab pd2t2 covid2 if `var'==1, col
+logistic pd2t2 covid2 if `var'==1
+
+}
 //univariate and then mulivariate
 			
 // vaccine efficacy overall unadjuste and adjusted for minimal things- in 4 age grousp 18 to 39, 41/64, 65/79 and 80+
 
-
-
 logistic   pd1t1 covid2 
-logistic   pd1t1 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region2 i.imd
+logistic   pd1t1 covid2  age sex2 bmi2 i.ethnicity carehome i.region2 i.imd
 logistic   pd1t2 covid2 
-logistic   pd1t2 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region2 i.imd
+logistic   pd1t2 covid2  age sex2 bmi2 i.ethnicity carehome i.region2 i.imd
 
 
 logistic   pd1t1 covid2 if solid_organ_transplantation==1
-logistic   pd1t1 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region2 i.imd if solid_organ_transplantation==1
+logistic   pd1t1 covid2  age sex2 if solid_organ_transplantation==1
 logistic   pd1t2 covid2  if solid_organ_transplantation==1
-logistic   pd1t2 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region2 i.imd if solid_organ_transplantation==1
+logistic   pd1t2 covid2  age sex2 if solid_organ_transplantation==1
 
 
 logistic   pd1t1 covid2 if chemo_or_radio==1
-logistic   pd1t1 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region2 i.imd if chemo_or_radio==1
+logistic   pd1t1 covid2  age sex2 if chemo_or_radio==1
 logistic   pd1t2 covid2  if solid_organ_transplantation==1
-logistic   pd1t2 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region2 i.imd if chemo_or_radio==1
+logistic   pd1t2 covid2  age sex2 if chemo_or_radio==1
 
 
 logistic   pd1t1 covid2 if solid_organ_transplantation==1  & ageg==4
-logistic   pd1t1 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region2 i.imd if solid_organ_transplantation==1 & ageg==4
+logistic   pd1t1 covid2  age sex2 if solid_organ_transplantation==1 & ageg==4
 logistic   pd1t2 covid2  if solid_organ_transplantation==1  & ageg==4
-logistic   pd1t2 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region2 i.imd if solid_organ_transplantation==1  & ageg==4
+logistic   pd1t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==4
 
 
 logistic   pd1t1 covid2 if chemo_or_radio==1  & ageg==4
-logistic   pd1t1 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region2 i.imd if chemo_or_radio==1  & ageg==4
+logistic   pd1t1 covid2  age sex2 if chemo_or_radio==1  & ageg==4
 logistic   pd1t2 covid2  if solid_organ_transplantation==1  & ageg==4
-logistic   pd1t2 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region2 i.imd if chemo_or_radio==1  & ageg==4
+logistic   pd1t2 covid2  age sex2 if chemo_or_radio==1  & ageg==4
 
 
 logistic   pd1t1 covid2 if solid_organ_transplantation==1  & ageg==3
-logistic   pd1t1 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region2 i.imd if solid_organ_transplantation==1 & ageg==3
+logistic   pd1t1 covid2  age sex2 if solid_organ_transplantation==1 & ageg==3
 logistic   pd1t2 covid2  if solid_organ_transplantation==1  & ageg==3
-logistic   pd1t2 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region2 i.imd if solid_organ_transplantation==1  & ageg==3
+logistic   pd1t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==3
 
 
 logistic   pd1t1 covid2 if chemo_or_radio==1  & ageg==3
-logistic   pd1t1 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region2 i.imd if chemo_or_radio==1  & ageg==3
+logistic   pd1t1 covid2  age sex2 if chemo_or_radio==1  & ageg==3
 logistic   pd1t2 covid2  if solid_organ_transplantation==1  & ageg==3
-logistic   pd1t2 covid2  age sex2 bmi2 i.ethnicity carehome i.ethnicity i.region2 i.imd if chemo_or_radio==1  & ageg==3
+logistic   pd1t2 covid2  age sex2 if chemo_or_radio==1  & ageg==3
 
 log close
