@@ -84,7 +84,7 @@ gen pfizerd2 = covid_vax_pfizer_2_date2
 recode pfizerd2 min/max=1
 
 
-//time between pfizer vaccine dose 1 and either a positive or negative test_7july
+//time between pfizer vaccine dose 1 and either a positive or negative test
 gen timevacpfd1neg = negative_test_result_1_date2-covid_vax_pfizer_1_date2
 recode timevacpfd1neg 0/20=1 21/max=2
 recode timevacpfd1neg min/-1=.
@@ -100,7 +100,7 @@ recode timevacpfizerd1 .=1 if timevacpfd1neg==1
 recode timevacpfizerd1 .=2 if timevacpfd1neg==2
 tab timevacpfizerd1
 
-//time between pfizer vaccine dose 2 and either a positive or negative test_7july
+//time between pfizer vaccine dose 2 and either a positive or negative test
 gen timevacpfd2neg = negative_test_result_1_date2-covid_vax_pfizer_2_date2
 recode timevacpfd2neg 0/13=1 14/max=2
 recode timevacpfd2neg min/-1=.
@@ -124,7 +124,7 @@ recode azd1 min/max=1
 gen azd2 = covid_vax_az_2_date2
 recode azd2 min/max=1
 
-//time between AZ vaccine dose 1 and either a positive or negative test_7july
+//time between AZ vaccine dose 1 and either a positive or negative test
 gen timevacazd1neg = negative_test_result_1_date2-covid_vax_az_1_date2
 recode timevacazd1neg 0/20=1 21/max=2
 recode timevacazd1neg min/-1=.
@@ -140,7 +140,7 @@ recode timevacazd1 .=1 if timevacazd1neg==1
 recode timevacazd1 .=2 if timevacazd1neg==2
 tab timevacazd1
 
-//time between AZ vaccine dose 2 and either a positive or negative test_7july
+//time between AZ vaccine dose 2 and either a positive or negative test
 gen timevacazd2neg = negative_test_result_1_date2-covid_vax_az_2_date2
 recode timevacazd2neg 0/13=1 14/max=2
 recode timevacazd2neg min/-1=.
@@ -187,11 +187,36 @@ recode pd2t2 .=0 if novaccine==1
 recode pd2t2 2=1
 tab pd2t2
 
+gen az1t1 = timevacazd1
+recode az1t1 2=.
+recode az1t1 .=0 if novaccine==1
+tab az1t1
+
+gen az1t2 = timevacazd1
+recode az1t2 1=. 
+recode az1t2 .=0 if novaccine==1
+recode az1t2 2=1
+tab az1t2
+
+
+gen az2t1 = timevacazd2
+recode az2t1 2=. 
+recode az2t1 .=0 if novaccine==1
+tab az2t1
+
+gen az2t2 = timevacazd2
+recode az2t2 1=. 
+recode az2t2 .=0 if novaccine==1
+recode az2t2 2=1
+tab az2t2
+
 
 // vaccine % and univariate analysis //- by age group, any type, d1, d2- grousp 0-20- 21+ and D2 14+ and time period before janry 8th and after
 		
-local desc2 "pd1t1 pd1t2 pd2t1 pd2t2 sex2 bmi2 carehome has_follow_up_previous_year  ethnicity region2 imd chronic_cardiac_disease diabetes_type_1 diabetes_type_2 diabetes_unknown_type current_copd dmards dementia dialysis solid_organ_transplantation chemo_or_radio intel_dis_incl_downs_syndrome lung_cancer cancer_excl_lung_and_haem haematological_cancer cystic_fibrosis sickle_cell_disease permanant_immunosuppression temporary_immunosuppression psychosis_schiz_bipolar asplenia"
-		
+
+local desc2 "pd1t1 pd1t2 pd2t1 pd2t2 az1t1 az1t2 az2t1 az2t2 sex2 bmi2 carehome has_follow_up_previous_year  ethnicity region2 imd chronic_cardiac_disease diabetes_type_1 diabetes_type_2 diabetes_unknown_type current_copd dmards dementia dialysis solid_organ_transplantation chemo_or_radio intel_dis_incl_downs_syndrome lung_cancer cancer_excl_lung_and_haem haematological_cancer bone_marrow_transplant cystic_fibrosis sickle_cell_disease permanant_immunosuppression temporary_immunosuppression psychosis_schiz_bipolar asplenia"
+
+	
 foreach var of local desc2 {
 tab `var' covid2, col
 mhodds  covid2 `var'
@@ -201,27 +226,31 @@ local desc3 "carehome chronic_cardiac_disease diabetes_type_1 diabetes_type_2 di
 
 foreach var of local desc3 {
 tab `var'
-tab pd1t1 covid2 if `var'==1, col
 logistic pd1t1 covid2 if `var'==1
 
-tab pd1t2 covid2 if `var'==1, col
 logistic pd1t2 covid2 if `var'==1
 
-tab pd2t1 covid2 if `var'==1, col
 logistic pd2t1 covid2 if `var'==1
 
-tab pd2t2 covid2 if `var'==1, col
 logistic pd2t2 covid2 if `var'==1
+
+logistic az1t1 covid2 if `var'==1
+
+logistic az1t2 covid2 if `var'==1
+
+logistic az2t1 covid2 if `var'==1
+
+logistic az2t2 covid2 if `var'==1
 
 }
 //univariate and then mulivariate
 			
 // vaccine efficacy overall unadjuste and adjusted for minimal things- in 4 age grousp 18 to 39, 41/64, 65/79 and 80+
-
+///Pfizer dose 1
 logistic   pd1t1 covid2 
-logistic   pd1t1 covid2  age sex2 bmi2 i.ethnicity carehome i.region2 i.imd
+logistic   pd1t1 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd
 logistic   pd1t2 covid2 
-logistic   pd1t2 covid2  age sex2 bmi2 i.ethnicity carehome i.region2 i.imd
+logistic   pd1t2 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd
 
 
 logistic   pd1t1 covid2 if solid_organ_transplantation==1
@@ -232,7 +261,7 @@ logistic   pd1t2 covid2  age sex2 if solid_organ_transplantation==1
 
 logistic   pd1t1 covid2 if chemo_or_radio==1
 logistic   pd1t1 covid2  age sex2 if chemo_or_radio==1
-logistic   pd1t2 covid2  if solid_organ_transplantation==1
+logistic   pd1t2 covid2  if chemo_or_radio==1
 logistic   pd1t2 covid2  age sex2 if chemo_or_radio==1
 
 
@@ -244,7 +273,7 @@ logistic   pd1t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==4
 
 logistic   pd1t1 covid2 if chemo_or_radio==1  & ageg==4
 logistic   pd1t1 covid2  age sex2 if chemo_or_radio==1  & ageg==4
-logistic   pd1t2 covid2  if solid_organ_transplantation==1  & ageg==4
+logistic   pd1t2 covid2  if chemo_or_radio==1  & ageg==4
 logistic   pd1t2 covid2  age sex2 if chemo_or_radio==1  & ageg==4
 
 
@@ -256,7 +285,133 @@ logistic   pd1t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==3
 
 logistic   pd1t1 covid2 if chemo_or_radio==1  & ageg==3
 logistic   pd1t1 covid2  age sex2 if chemo_or_radio==1  & ageg==3
-logistic   pd1t2 covid2  if solid_organ_transplantation==1  & ageg==3
+logistic   pd1t2 covid2  if chemo_or_radio==1  & ageg==3
 logistic   pd1t2 covid2  age sex2 if chemo_or_radio==1  & ageg==3
+
+///Pfizer dose 2
+logistic   pd2t1 covid2 
+logistic   pd2t1 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd
+logistic   pd2t2 covid2 
+logistic   pd2t2 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd
+
+
+logistic   pd2t1 covid2 if solid_organ_transplantation==1
+logistic   pd2t1 covid2  age sex2 if solid_organ_transplantation==1
+logistic   pd2t2 covid2  if solid_organ_transplantation==1
+logistic   pd2t2 covid2  age sex2 if solid_organ_transplantation==1
+
+
+logistic   pd2t1 covid2 if chemo_or_radio==1
+logistic   pd2t1 covid2  age sex2 if chemo_or_radio==1
+logistic   pd2t2 covid2  if chemo_or_radio==1
+logistic   pd2t2 covid2  age sex2 if chemo_or_radio==1
+
+
+logistic   pd2t1 covid2 if solid_organ_transplantation==1  & ageg==4
+logistic   pd2t1 covid2  age sex2 if solid_organ_transplantation==1 & ageg==4
+logistic   pd2t2 covid2  if solid_organ_transplantation==1  & ageg==4
+logistic   pd2t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==4
+
+
+logistic   pd2t1 covid2 if chemo_or_radio==1  & ageg==4
+logistic   pd2t1 covid2  age sex2 if chemo_or_radio==1  & ageg==4
+logistic   pd2t2 covid2  if chemo_or_radio==1  & ageg==4
+logistic   pd2t2 covid2  age sex2 if chemo_or_radio==1  & ageg==4
+
+
+logistic   pd2t1 covid2 if solid_organ_transplantation==1  & ageg==3
+logistic   pd2t1 covid2  age sex2 if solid_organ_transplantation==1 & ageg==3
+logistic   pd2t2 covid2  if solid_organ_transplantation==1  & ageg==3
+logistic   pd2t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==3
+
+
+logistic   pd2t1 covid2 if chemo_or_radio==1  & ageg==3
+logistic   pd2t1 covid2  age sex2 if chemo_or_radio==1  & ageg==3
+logistic   pd2t2 covid2  if chemo_or_radio==1  & ageg==3
+logistic   pd2t2 covid2  age sex2 if chemo_or_radio==1  & ageg==3
+
+///Astra Zeneca dose 1
+logistic   az1t1 covid2 
+logistic   az1t1 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd
+logistic   az1t2 covid2 
+logistic   az1t2 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd
+
+
+logistic   az1t1 covid2 if solid_organ_transplantation==1
+logistic   az1t1 covid2  age sex2 if solid_organ_transplantation==1
+logistic   az1t2 covid2  if solid_organ_transplantation==1
+logistic   az1t2 covid2  age sex2 if solid_organ_transplantation==1
+
+
+logistic   az1t1 covid2 if chemo_or_radio==1
+logistic   az1t1 covid2  age sex2 if chemo_or_radio==1
+logistic   az1t2 covid2  if chemo_or_radio==1
+logistic   az1t2 covid2  age sex2 if chemo_or_radio==1
+
+
+logistic   az1t1 covid2 if solid_organ_transplantation==1  & ageg==4
+logistic   az1t1 covid2  age sex2 if solid_organ_transplantation==1 & ageg==4
+logistic   az1t2 covid2  if solid_organ_transplantation==1  & ageg==4
+logistic   az1t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==4
+
+
+logistic   az1t1 covid2 if chemo_or_radio==1  & ageg==4
+logistic   az1t1 covid2  age sex2 if chemo_or_radio==1  & ageg==4
+logistic   az1t2 covid2  if chemo_or_radio==1  & ageg==4
+logistic   az1t2 covid2  age sex2 if chemo_or_radio==1  & ageg==4
+
+
+logistic   az1t1 covid2 if solid_organ_transplantation==1  & ageg==3
+logistic   az1t1 covid2  age sex2 if solid_organ_transplantation==1 & ageg==3
+logistic   az1t2 covid2  if solid_organ_transplantation==1  & ageg==3
+logistic   az1t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==3
+
+
+logistic   az1t1 covid2 if chemo_or_radio==1  & ageg==3
+logistic   az1t1 covid2  age sex2 if chemo_or_radio==1  & ageg==3
+logistic   az1t2 covid2  if chemo_or_radio==1  & ageg==3
+logistic   az1t2 covid2  age sex2 if chemo_or_radio==1  & ageg==3
+
+///Astra Zeneca dose 2
+logistic   az2t1 covid2 
+logistic   az2t1 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd
+logistic   az2t2 covid2 
+logistic   az2t2 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd
+
+
+logistic   az2t1 covid2 if solid_organ_transplantation==1
+logistic   az2t1 covid2  age sex2 if solid_organ_transplantation==1
+logistic   az2t2 covid2  if solid_organ_transplantation==1
+logistic   az2t2 covid2  age sex2 if solid_organ_transplantation==1
+
+
+logistic   az2t1 covid2 if chemo_or_radio==1
+logistic   az2t1 covid2  age sex2 if chemo_or_radio==1
+logistic   az2t2 covid2  if chemo_or_radio==1
+logistic   az2t2 covid2  age sex2 if chemo_or_radio==1
+
+
+logistic   az2t1 covid2 if solid_organ_transplantation==1  & ageg==4
+logistic   az2t1 covid2  age sex2 if solid_organ_transplantation==1 & ageg==4
+logistic   az2t2 covid2  if solid_organ_transplantation==1  & ageg==4
+logistic   az2t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==4
+
+
+logistic   az2t1 covid2 if chemo_or_radio==1  & ageg==4
+logistic   az2t1 covid2  age sex2 if chemo_or_radio==1  & ageg==4
+logistic   az2t2 covid2  if chemo_or_radio==1  & ageg==4
+logistic   az2t2 covid2  age sex2 if chemo_or_radio==1  & ageg==4
+
+
+logistic   az2t1 covid2 if solid_organ_transplantation==1  & ageg==3
+logistic   az2t1 covid2  age sex2 if solid_organ_transplantation==1 & ageg==3
+logistic   az2t2 covid2  if solid_organ_transplantation==1  & ageg==3
+logistic   az2t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==3
+
+
+logistic   az2t1 covid2 if chemo_or_radio==1  & ageg==3
+logistic   az2t1 covid2  age sex2 if chemo_or_radio==1  & ageg==3
+logistic   az2t2 covid2  if chemo_or_radio==1  & ageg==3
+logistic   az2t2 covid2  age sex2 if chemo_or_radio==1  & ageg==3
 
 log close
