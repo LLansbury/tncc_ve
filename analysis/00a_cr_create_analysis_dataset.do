@@ -98,6 +98,7 @@ tab timevacpfd1pos
 gen timevacpfizerd1=timevacpfd1pos
 recode timevacpfizerd1 .=1 if timevacpfd1neg==1
 recode timevacpfizerd1 .=2 if timevacpfd1neg==2
+tab timevacpfizerd1
 
 //time between pfizer vaccine dose 2 and either a positive or negative test
 gen timevacpfd2neg = negative_test_result_1_date2-covid_vax_pfizer_2_date2
@@ -113,6 +114,7 @@ tab timevacpfd2pos
 gen timevacpfizerd2=timevacpfd2pos
 recode timevacpfizerd2 .=1 if timevacpfd2neg==1
 recode timevacpfizerd2 .=2 if timevacpfd2neg==2
+tab timevacpfizerd2
 
 //** AZ VACCINE doses 1 and 2 (LL added)
 
@@ -211,14 +213,16 @@ tab az2t2
 
 // vaccine % and univariate analysis //- by age group, any type, d1, d2- grousp 0-20- 21+ and D2 14+ and time period before janry 8th and after
 		
+
 local desc2 "pd1t1 pd1t2 pd2t1 pd2t2 az1t1 az1t2 az2t1 az2t2 sex2 bmi2 carehome has_follow_up_previous_year  ethnicity region2 imd chronic_cardiac_disease diabetes_type_1 diabetes_type_2 diabetes_unknown_type current_copd dmards dementia dialysis solid_organ_transplantation chemo_or_radio intel_dis_incl_downs_syndrome lung_cancer cancer_excl_lung_and_haem haematological_cancer bone_marrow_transplant cystic_fibrosis sickle_cell_disease permanant_immunosuppression temporary_immunosuppression psychosis_schiz_bipolar asplenia"
-		
+
+	
 foreach var of local desc2 {
 tab `var' covid2, col
 mhodds  covid2 `var'
 }	
 
-local desc3 "carehome chronic_cardiac_disease diabetes_type_1 diabetes_type_2 diabetes_unknown_type current_copd dmards dementia dialysis solid_organ_transplantation chemo_or_radio intel_dis_incl_downs_syndrome lung_cancer cancer_excl_lung_and_haem haematological_cancer bone_marrow_transplant cystic_fibrosis sickle_cell_disease permanant_immunosuppression temporary_immunosuppression psychosis_schiz_bipolar asplenia "
+local desc3 "carehome chronic_cardiac_disease diabetes_type_1 diabetes_type_2 diabetes_unknown_type current_copd dmards dementia dialysis solid_organ_transplantation chemo_or_radio intel_dis_incl_downs_syndrome lung_cancer cancer_excl_lung_and_haem haematological_cancer cystic_fibrosis sickle_cell_disease permanant_immunosuppression temporary_immunosuppression psychosis_schiz_bipolar asplenia "
 
 foreach var of local desc3 {
 tab `var'
