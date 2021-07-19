@@ -55,14 +55,14 @@ recode nocovid min/max=1
 tab nocovid
 
 //exclude if neg result within 3 weeks of positive_test_1_date
-gen covid2= covid
-
-recode covid2 .=0 if nocovid==1
-
 gen testtime = positive_test_1_date2-negative_test_result_1_date2
-
 recode testtime -21/20=0
 recode nocovid 1=. if testtime==0
+
+gen covid2= covid
+recode covid2 .=0 if nocovid==1
+
+
 
 //early summary of data
 summ age, detail
