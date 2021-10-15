@@ -523,6 +523,49 @@ study = StudyDefinition(
         },
     ),
 
+    #PCR#
+    test_type=patients.with_test_result_in_sgss(
+        pathogen="SARS-CoV2",
+        test_result="positive",
+        on_or_after="index_date + 1 day",
+        restrict_to_earliest_specimen_date=True,
+        returning="case_category",
+        return_expectations={
+            "rate": "universal",
+            "category": {"ratios": {"LFT_Only": 0.3, "PCR_Only":0.3, "LFT_withPCR":0.4, }
+            },
+        },
+    ), 
+
+    #SYMPTOMATIC#
+    symptomatic_people=patients.with_test_result_in_sgss(
+        pathogen="SARS-CoV2",
+        test_result="any",
+        on_or_after="index_date + 1 day",
+        restrict_to_earliest_specimen_date=False,
+        returning="symptomatic",
+        return_expectations={
+            "rate":"universal",
+            "category": {"ratios": {"": 0.3, "Y": 0.3, "N":0.4,}
+            },
+        },
+    ),  
+
+    #S-TARGET FAILURE#
+
+    s_genetarget_failure=patients.with_test_result_in_sgss(
+        pathogen="SARS-CoV2",
+        test_result="positive",
+        on_or_after="index_date + 1 day",
+        restrict_to_earliest_specimen_date=True,
+        returning="s_gene_target_failure",
+        return_expectations={
+            "rate": "universal",
+            "category": {"ratios": {1 :0.3, 2:0.3, 3:0.4,}
+            },
+        },
+    ),
+
     # FIRST PRIMARY CARE CASE IDENTIFICATION DURING STUDY    
     primary_care_covid_case_1_date=patients.with_these_clinical_events(
         combine_codelists(
