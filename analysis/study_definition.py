@@ -525,7 +525,7 @@ study = StudyDefinition(
 
     #PCR#
     test_type=patients.with_test_result_in_sgss(
-        pathogen="SARS-CoV2",
+        pathogen="SARS-CoV-2",
         test_result="positive",
         on_or_after="index_date + 1 day",
         restrict_to_earliest_specimen_date=True,
@@ -539,7 +539,7 @@ study = StudyDefinition(
 
     #SYMPTOMATIC#
     symptomatic_people=patients.with_test_result_in_sgss(
-        pathogen="SARS-CoV2",
+        pathogen="SARS-CoV-2",
         test_result="any",
         on_or_after="index_date + 1 day",
         restrict_to_earliest_specimen_date=False,
@@ -554,7 +554,7 @@ study = StudyDefinition(
     #S-TARGET FAILURE#
 
     s_genetarget_failure=patients.with_test_result_in_sgss(
-        pathogen="SARS-CoV2",
+        pathogen="SARS-CoV-2",
         test_result="positive",
         on_or_after="index_date + 1 day",
         restrict_to_earliest_specimen_date=True,
