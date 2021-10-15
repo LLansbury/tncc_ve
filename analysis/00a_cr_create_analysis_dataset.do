@@ -210,6 +210,10 @@ recode az2t2 .=0 if novaccine==1
 recode az2t2 2=1
 tab az2t2
 
+gen symptoms=0
+recode symptoms 0=1 if symptomatic_people=="Y"
+tab symptoms
+
 
 // vaccine % and univariate analysis //- by age group, any type, d1, d2- grousp 0-20- 21+ and D2 14+ and time period before janry 8th and after
 		
@@ -247,171 +251,169 @@ logistic az2t2 covid2 if `var'==1
 			
 // vaccine efficacy overall unadjuste and adjusted for minimal things- in 4 age grousp 18 to 39, 41/64, 65/79 and 80+
 ///Pfizer dose 1
-logistic   pd1t1 covid2 
-logistic   pd1t1 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd
-logistic   pd1t2 covid2 
-logistic   pd1t2 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd
+logistic   pd1t1 covid2 if symptoms==1
+logistic   pd1t1 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
+logistic   pd1t2 covid2 if symptoms==1
+logistic   pd1t2 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
 
 
-logistic   pd1t1 covid2 if solid_organ_transplantation==1
-logistic   pd1t1 covid2  age sex2 if solid_organ_transplantation==1
-logistic   pd1t2 covid2  if solid_organ_transplantation==1
-logistic   pd1t2 covid2  age sex2 if solid_organ_transplantation==1
+logistic   pd1t1 covid2 if solid_organ_transplantation==1 & symptoms==1
+logistic   pd1t1 covid2  age sex2 if solid_organ_transplantation==1 & symptoms==1
+logistic   pd1t2 covid2  if solid_organ_transplantation==1 & symptoms==1
+logistic   pd1t2 covid2  age sex2 if solid_organ_transplantation==1 & symptoms==1
 
 
-logistic   pd1t1 covid2 if chemo_or_radio==1
-logistic   pd1t1 covid2  age sex2 if chemo_or_radio==1
-logistic   pd1t2 covid2  if chemo_or_radio==1
-logistic   pd1t2 covid2  age sex2 if chemo_or_radio==1
+logistic   pd1t1 covid2 if chemo_or_radio==1 & symptoms==1
+logistic   pd1t1 covid2  age sex2 if chemo_or_radio==1 & symptoms==1
+logistic   pd1t2 covid2  if chemo_or_radio==1 & symptoms==1
+logistic   pd1t2 covid2  age sex2 if chemo_or_radio==1 & symptoms==1
+
+logistic   pd1t1 covid2 if solid_organ_transplantation==1  & ageg==4 & symptoms==1
+logistic   pd1t1 covid2  age sex2 if solid_organ_transplantation==1 & ageg==4 & symptoms==1
+logistic   pd1t2 covid2  if solid_organ_transplantation==1  & ageg==4 & symptoms==1
+logistic   pd1t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==4 & symptoms==1
+
+logistic   pd1t1 covid2 if chemo_or_radio==1  & ageg==4 & symptoms==1
+logistic   pd1t1 covid2  age sex2 if chemo_or_radio==1  & ageg==4 & symptoms==1
+logistic   pd1t2 covid2  if chemo_or_radio==1  & ageg==4 & symptoms==1
+logistic   pd1t2 covid2  age sex2 if chemo_or_radio==1  & ageg==4 & symptoms==1
 
 
-logistic   pd1t1 covid2 if solid_organ_transplantation==1  & ageg==4
-logistic   pd1t1 covid2  age sex2 if solid_organ_transplantation==1 & ageg==4
-logistic   pd1t2 covid2  if solid_organ_transplantation==1  & ageg==4
-logistic   pd1t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==4
+logistic   pd1t1 covid2 if solid_organ_transplantation==1  & ageg==3 & symptoms==1
+logistic   pd1t1 covid2  age sex2 if solid_organ_transplantation==1 & ageg==3 & symptoms==1
+logistic   pd1t2 covid2  if solid_organ_transplantation==1  & ageg==3 & symptoms==1
+logistic   pd1t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==3 & symptoms==1
 
 
-logistic   pd1t1 covid2 if chemo_or_radio==1  & ageg==4
-logistic   pd1t1 covid2  age sex2 if chemo_or_radio==1  & ageg==4
-logistic   pd1t2 covid2  if chemo_or_radio==1  & ageg==4
-logistic   pd1t2 covid2  age sex2 if chemo_or_radio==1  & ageg==4
-
-
-logistic   pd1t1 covid2 if solid_organ_transplantation==1  & ageg==3
-logistic   pd1t1 covid2  age sex2 if solid_organ_transplantation==1 & ageg==3
-logistic   pd1t2 covid2  if solid_organ_transplantation==1  & ageg==3
-logistic   pd1t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==3
-
-
-logistic   pd1t1 covid2 if chemo_or_radio==1  & ageg==3
-logistic   pd1t1 covid2  age sex2 if chemo_or_radio==1  & ageg==3
-logistic   pd1t2 covid2  if chemo_or_radio==1  & ageg==3
-logistic   pd1t2 covid2  age sex2 if chemo_or_radio==1  & ageg==3
+logistic   pd1t1 covid2 if chemo_or_radio==1  & ageg==3 & symptoms==1
+logistic   pd1t1 covid2  age sex2 if chemo_or_radio==1  & ageg==3 & symptoms==1
+logistic   pd1t2 covid2  if chemo_or_radio==1  & ageg==3 & symptoms==1
+logistic   pd1t2 covid2  age sex2 if chemo_or_radio==1  & ageg==3 & symptoms==1
 
 ///Pfizer dose 2
-logistic   pd2t1 covid2 
-logistic   pd2t1 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd
-logistic   pd2t2 covid2 
-logistic   pd2t2 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd
+logistic   pd2t1 covid2 if symptoms==1
+logistic   pd2t1 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
+logistic   pd2t2 covid2 if symptoms==1
+logistic   pd2t2 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
 
 
-logistic   pd2t1 covid2 if solid_organ_transplantation==1
-logistic   pd2t1 covid2  age sex2 if solid_organ_transplantation==1
-logistic   pd2t2 covid2  if solid_organ_transplantation==1
-logistic   pd2t2 covid2  age sex2 if solid_organ_transplantation==1
+logistic   pd2t1 covid2 if solid_organ_transplantation==1 & symptoms==1
+logistic   pd2t1 covid2  age sex2 if solid_organ_transplantation==1 & symptoms==1
+logistic   pd2t2 covid2  if solid_organ_transplantation==1 & symptoms==1
+logistic   pd2t2 covid2  age sex2 if solid_organ_transplantation==1 & symptoms==1
 
 
-logistic   pd2t1 covid2 if chemo_or_radio==1
-logistic   pd2t1 covid2  age sex2 if chemo_or_radio==1
-logistic   pd2t2 covid2  if chemo_or_radio==1
-logistic   pd2t2 covid2  age sex2 if chemo_or_radio==1
+logistic   pd2t1 covid2 if chemo_or_radio==1 & symptoms==1
+logistic   pd2t1 covid2  age sex2 if chemo_or_radio==1 & symptoms==1
+logistic   pd2t2 covid2  if chemo_or_radio==1 & symptoms==1
+logistic   pd2t2 covid2  age sex2 if chemo_or_radio==1 & symptoms==1
 
 
-logistic   pd2t1 covid2 if solid_organ_transplantation==1  & ageg==4
-logistic   pd2t1 covid2  age sex2 if solid_organ_transplantation==1 & ageg==4
-logistic   pd2t2 covid2  if solid_organ_transplantation==1  & ageg==4
-logistic   pd2t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==4
+logistic   pd2t1 covid2 if solid_organ_transplantation==1  & ageg==4 & symptoms==1
+logistic   pd2t1 covid2  age sex2 if solid_organ_transplantation==1 & ageg==4 & symptoms==1
+logistic   pd2t2 covid2  if solid_organ_transplantation==1  & ageg==4 & symptoms==1
+logistic   pd2t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==4 & symptoms==1
 
 
-logistic   pd2t1 covid2 if chemo_or_radio==1  & ageg==4
-logistic   pd2t1 covid2  age sex2 if chemo_or_radio==1  & ageg==4
-logistic   pd2t2 covid2  if chemo_or_radio==1  & ageg==4
-logistic   pd2t2 covid2  age sex2 if chemo_or_radio==1  & ageg==4
+logistic   pd2t1 covid2 if chemo_or_radio==1  & ageg==4 & symptoms==1
+logistic   pd2t1 covid2  age sex2 if chemo_or_radio==1  & ageg==4 & symptoms==1
+logistic   pd2t2 covid2  if chemo_or_radio==1  & ageg==4 & symptoms==1
+logistic   pd2t2 covid2  age sex2 if chemo_or_radio==1  & ageg==4 & symptoms==1
 
 
-logistic   pd2t1 covid2 if solid_organ_transplantation==1  & ageg==3
-logistic   pd2t1 covid2  age sex2 if solid_organ_transplantation==1 & ageg==3
-logistic   pd2t2 covid2  if solid_organ_transplantation==1  & ageg==3
-logistic   pd2t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==3
+logistic   pd2t1 covid2 if solid_organ_transplantation==1  & ageg==3 & symptoms==1
+logistic   pd2t1 covid2  age sex2 if solid_organ_transplantation==1 & ageg==3 & symptoms==1
+logistic   pd2t2 covid2  if solid_organ_transplantation==1  & ageg==3 & symptoms==1
+logistic   pd2t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==3 & symptoms==1
 
 
-logistic   pd2t1 covid2 if chemo_or_radio==1  & ageg==3
-logistic   pd2t1 covid2  age sex2 if chemo_or_radio==1  & ageg==3
-logistic   pd2t2 covid2  if chemo_or_radio==1  & ageg==3
-logistic   pd2t2 covid2  age sex2 if chemo_or_radio==1  & ageg==3
+logistic   pd2t1 covid2 if chemo_or_radio==1  & ageg==3 & symptoms==1
+logistic   pd2t1 covid2  age sex2 if chemo_or_radio==1  & ageg==3 & symptoms==1
+logistic   pd2t2 covid2  if chemo_or_radio==1  & ageg==3 & symptoms==1
+logistic   pd2t2 covid2  age sex2 if chemo_or_radio==1  & ageg==3 & symptoms==1
 
 ///Astra Zeneca dose 1
-logistic   az1t1 covid2 
-logistic   az1t1 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd
-logistic   az1t2 covid2 
-logistic   az1t2 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd
+logistic   az1t1 covid2 if symptoms==1
+logistic   az1t1 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
+logistic   az1t2 covid2 if symptoms==1
+logistic   az1t2 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
 
 
-logistic   az1t1 covid2 if solid_organ_transplantation==1
-logistic   az1t1 covid2  age sex2 if solid_organ_transplantation==1
-logistic   az1t2 covid2  if solid_organ_transplantation==1
-logistic   az1t2 covid2  age sex2 if solid_organ_transplantation==1
+logistic   az1t1 covid2 if solid_organ_transplantation==1 & symptoms==1
+logistic   az1t1 covid2  age sex2 if solid_organ_transplantation==1 & symptoms==1
+logistic   az1t2 covid2  if solid_organ_transplantation==1 & symptoms==1
+logistic   az1t2 covid2  age sex2 if solid_organ_transplantation==1 & symptoms==1
 
 
-logistic   az1t1 covid2 if chemo_or_radio==1
-logistic   az1t1 covid2  age sex2 if chemo_or_radio==1
-logistic   az1t2 covid2  if chemo_or_radio==1
-logistic   az1t2 covid2  age sex2 if chemo_or_radio==1
+logistic   az1t1 covid2 if chemo_or_radio==1 & symptoms==1
+logistic   az1t1 covid2  age sex2 if chemo_or_radio==1 & symptoms==1
+logistic   az1t2 covid2  if chemo_or_radio==1 & symptoms==1
+logistic   az1t2 covid2  age sex2 if chemo_or_radio==1 & symptoms==1
 
 
-logistic   az1t1 covid2 if solid_organ_transplantation==1  & ageg==4
-logistic   az1t1 covid2  age sex2 if solid_organ_transplantation==1 & ageg==4
-logistic   az1t2 covid2  if solid_organ_transplantation==1  & ageg==4
-logistic   az1t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==4
+logistic   az1t1 covid2 if solid_organ_transplantation==1  & ageg==4 & symptoms==1
+logistic   az1t1 covid2  age sex2 if solid_organ_transplantation==1 & ageg==4 & symptoms==1
+logistic   az1t2 covid2  if solid_organ_transplantation==1  & ageg==4 & symptoms==1
+logistic   az1t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==4 & symptoms==1
 
 
-logistic   az1t1 covid2 if chemo_or_radio==1  & ageg==4
-logistic   az1t1 covid2  age sex2 if chemo_or_radio==1  & ageg==4
-logistic   az1t2 covid2  if chemo_or_radio==1  & ageg==4
-logistic   az1t2 covid2  age sex2 if chemo_or_radio==1  & ageg==4
+logistic   az1t1 covid2 if chemo_or_radio==1  & ageg==4 & symptoms==1
+logistic   az1t1 covid2  age sex2 if chemo_or_radio==1  & ageg==4 & symptoms==1
+logistic   az1t2 covid2  if chemo_or_radio==1  & ageg==4 & symptoms==1
+logistic   az1t2 covid2  age sex2 if chemo_or_radio==1  & ageg==4 & symptoms==1
 
 
-logistic   az1t1 covid2 if solid_organ_transplantation==1  & ageg==3
-logistic   az1t1 covid2  age sex2 if solid_organ_transplantation==1 & ageg==3
-logistic   az1t2 covid2  if solid_organ_transplantation==1  & ageg==3
-logistic   az1t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==3
+logistic   az1t1 covid2 if solid_organ_transplantation==1  & ageg==3 & symptoms==1
+logistic   az1t1 covid2  age sex2 if solid_organ_transplantation==1 & ageg==3 & symptoms==1
+logistic   az1t2 covid2  if solid_organ_transplantation==1  & ageg==3 & symptoms==1
+logistic   az1t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==3 & symptoms==1
 
 
-logistic   az1t1 covid2 if chemo_or_radio==1  & ageg==3
-logistic   az1t1 covid2  age sex2 if chemo_or_radio==1  & ageg==3
-logistic   az1t2 covid2  if chemo_or_radio==1  & ageg==3
-logistic   az1t2 covid2  age sex2 if chemo_or_radio==1  & ageg==3
+logistic   az1t1 covid2 if chemo_or_radio==1  & ageg==3 & symptoms==1
+logistic   az1t1 covid2  age sex2 if chemo_or_radio==1  & ageg==3 & symptoms==1
+logistic   az1t2 covid2  if chemo_or_radio==1  & ageg==3 & symptoms==1
+logistic   az1t2 covid2  age sex2 if chemo_or_radio==1  & ageg==3 & symptoms==1
 
 ///Astra Zeneca dose 2
-logistic   az2t1 covid2 
-logistic   az2t1 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd
-logistic   az2t2 covid2 
-logistic   az2t2 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd
+logistic   az2t1 covid2 if symptoms==1
+logistic   az2t1 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
+logistic   az2t2 covid2 if symptoms==1
+logistic   az2t2 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
 
 
-logistic   az2t1 covid2 if solid_organ_transplantation==1
-logistic   az2t1 covid2  age sex2 if solid_organ_transplantation==1
-logistic   az2t2 covid2  if solid_organ_transplantation==1
-logistic   az2t2 covid2  age sex2 if solid_organ_transplantation==1
+logistic   az2t1 covid2 if solid_organ_transplantation==1 & symptoms==1
+logistic   az2t1 covid2  age sex2 if solid_organ_transplantation==1 & symptoms==1
+logistic   az2t2 covid2  if solid_organ_transplantation==1 & symptoms==1
+logistic   az2t2 covid2  age sex2 if solid_organ_transplantation==1 & symptoms==1
 
 
-logistic   az2t1 covid2 if chemo_or_radio==1
-logistic   az2t1 covid2  age sex2 if chemo_or_radio==1
-logistic   az2t2 covid2  if chemo_or_radio==1
-logistic   az2t2 covid2  age sex2 if chemo_or_radio==1
+logistic   az2t1 covid2 if chemo_or_radio==1 & symptoms==1
+logistic   az2t1 covid2  age sex2 if chemo_or_radio==1 & symptoms==1
+logistic   az2t2 covid2  if chemo_or_radio==1 & symptoms==1
+logistic   az2t2 covid2  age sex2 if chemo_or_radio==1 & symptoms==1
 
 
-logistic   az2t1 covid2 if solid_organ_transplantation==1  & ageg==4
-logistic   az2t1 covid2  age sex2 if solid_organ_transplantation==1 & ageg==4
-logistic   az2t2 covid2  if solid_organ_transplantation==1  & ageg==4
-logistic   az2t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==4
+logistic   az2t1 covid2 if solid_organ_transplantation==1  & ageg==4 & symptoms==1
+logistic   az2t1 covid2  age sex2 if solid_organ_transplantation==1 & ageg==4 & symptoms==1
+logistic   az2t2 covid2  if solid_organ_transplantation==1  & ageg==4 & symptoms==1
+logistic   az2t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==4 & symptoms==1
 
 
-logistic   az2t1 covid2 if chemo_or_radio==1  & ageg==4
-logistic   az2t1 covid2  age sex2 if chemo_or_radio==1  & ageg==4
-logistic   az2t2 covid2  if chemo_or_radio==1  & ageg==4
-logistic   az2t2 covid2  age sex2 if chemo_or_radio==1  & ageg==4
+logistic   az2t1 covid2 if chemo_or_radio==1  & ageg==4 & symptoms==1
+logistic   az2t1 covid2  age sex2 if chemo_or_radio==1  & ageg==4 & symptoms==1
+logistic   az2t2 covid2  if chemo_or_radio==1  & ageg==4 & symptoms==1
+logistic   az2t2 covid2  age sex2 if chemo_or_radio==1  & ageg==4 & symptoms==1
 
 
-logistic   az2t1 covid2 if solid_organ_transplantation==1  & ageg==3
-logistic   az2t1 covid2  age sex2 if solid_organ_transplantation==1 & ageg==3
-logistic   az2t2 covid2  if solid_organ_transplantation==1  & ageg==3
-logistic   az2t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==3
+logistic   az2t1 covid2 if solid_organ_transplantation==1  & ageg==3 & symptoms==1
+logistic   az2t1 covid2  age sex2 if solid_organ_transplantation==1 & ageg==3 & symptoms==1
+logistic   az2t2 covid2  if solid_organ_transplantation==1  & ageg==3 & symptoms==1
+logistic   az2t2 covid2  age sex2 if solid_organ_transplantation==1  & ageg==3 & symptoms==1
 
 
-logistic   az2t1 covid2 if chemo_or_radio==1  & ageg==3
-logistic   az2t1 covid2  age sex2 if chemo_or_radio==1  & ageg==3
-logistic   az2t2 covid2  if chemo_or_radio==1  & ageg==3
-logistic   az2t2 covid2  age sex2 if chemo_or_radio==1  & ageg==3
+logistic   az2t1 covid2 if chemo_or_radio==1  & ageg==3 & symptoms==1
+logistic   az2t1 covid2  age sex2 if chemo_or_radio==1  & ageg==3 & symptoms==1
+logistic   az2t2 covid2  if chemo_or_radio==1  & ageg==3 & symptoms==1
+logistic   az2t2 covid2  age sex2 if chemo_or_radio==1  & ageg==3 & symptoms==1
 
 log close
