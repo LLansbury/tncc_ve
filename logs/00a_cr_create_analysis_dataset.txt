@@ -1,0 +1,2267 @@
+-------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /workspace/logs/00a_cr_create_analysis_dataset.txt
+  log type:  text
+ opened on:  15 Oct 2021, 11:17:51
+
+. 
+. 
+. 
+. 
+. //importing data
+. 
+. import delimited "output/input.csv"
+(58 vars, 10,000 obs)
+
+. 
+. rename prior_primary_care_covid_case_da prior_pc_covid_case_date
+
+. 
+. local dates "covid_vax_1_date covid_vax_2_date  covid_vax_3_date covid_vax_4_
+> date covid_vax_pfizer_1_date covid_vax_pfizer_2_date covid_vax_pfizer_3_date 
+> covid_vax_pfizer_4_date covid_vax_az_1_date covid_vax_az_2_date covid_vax_az_
+> 3_date covid_vax_az_4_date prior_positive_test_date prior_pc_covid_case_date 
+> prior_admitted_for_covid_date positive_test_1_date negative_test_result_1_dat
+> e primary_care_covid_case_1_date admitted_1_date coviddeath_date death_date"
+
+. 
+. foreach var of local dates {
+  2. gen `var'2=date(`var', "YMD")
+  3. format `var'2 %d
+  4. }
+(8,000 missing values generated)
+(8,000 missing values generated)
+(8,000 missing values generated)
+(8,000 missing values generated)
+(8,000 missing values generated)
+(8,000 missing values generated)
+(8,000 missing values generated)
+(8,000 missing values generated)
+(8,000 missing values generated)
+(8,000 missing values generated)
+(8,000 missing values generated)
+(8,000 missing values generated)
+(9,947 missing values generated)
+(8,178 missing values generated)
+(9,500 missing values generated)
+(8,000 missing values generated)
+(8,000 missing values generated)
+(9,500 missing values generated)
+(9,500 missing values generated)
+(9,800 missing values generated)
+(9,800 missing values generated)
+
+. 
+. local string "bmi sex stp region care_home_type"
+
+. 
+. foreach var of local string {
+  2.     encode `var', gen (`var'2)
+  3.         
+. }
+
+. 
+. gen carehome = care_home_type2
+(8,493 missing values generated)
+
+. recode carehome 1/3=1 .=0
+(carehome: 9495 changes made)
+
+. 
+. //Covid diagnosis
+. gen covid = positive_test_1_date2
+(8,000 missing values generated)
+
+. recode covid min/max=1
+(covid: 2000 changes made)
+
+. tab covid
+
+      covid |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |      2,000      100.00      100.00
+------------+-----------------------------------
+      Total |      2,000      100.00
+
+. 
+. gen nocovid = negative_test_result_1_date2
+(8,000 missing values generated)
+
+. recode nocovid min/max=1
+(nocovid: 2000 changes made)
+
+. tab nocovid
+
+    nocovid |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |      2,000      100.00      100.00
+------------+-----------------------------------
+      Total |      2,000      100.00
+
+. 
+. //exclude if neg result within 3 weeks of positive_test_1_date
+. gen testtime = positive_test_1_date2-negative_test_result_1_date2
+(9,611 missing values generated)
+
+. recode testtime -21/20=0
+(testtime: 275 changes made)
+
+. recode nocovid 1=. if testtime==0
+(nocovid: 291 changes made)
+
+. 
+. gen covid2= covid
+(8,000 missing values generated)
+
+. recode covid2 .=0 if nocovid==1
+(covid2: 1611 changes made)
+
+. 
+. 
+. 
+. //early summary of data
+. summ age, detail
+
+                             age
+-------------------------------------------------------------
+      Percentiles      Smallest
+ 1%            0              0
+ 5%            4              0
+10%            8              0       Obs              10,000
+25%           21              0       Sum of Wgt.      10,000
+
+50%           39                      Mean            40.4774
+                        Largest       Std. Dev.      23.62383
+75%           59             99
+90%           73             99       Variance       558.0855
+95%           79            103       Skewness       .1251692
+99%           89            109       Kurtosis       2.036157
+
+. 
+. gen ageg = age
+
+. recode ageg 18/39=1 40/64=2 65/79=3 80/max=4 min/17=.
+(ageg: 10000 changes made)
+
+. 
+. local desc "ageg sex2 bmi2 carehome has_follow_up_previous_year ethnicity_16 
+> ethnicity region2 imd chronic_cardiac_disease diabetes_type_1 diabetes_type_2
+>  diabetes_unknown_type current_copd dmards dementia dialysis solid_organ_tran
+> splantation chemo_or_radio intel_dis_incl_downs_syndrome lung_cancer cancer_e
+> xcl_lung_and_haem haematological_cancer bone_marrow_transplant cystic_fibrosi
+> s sickle_cell_disease permanant_immunosuppression temporary_immunosuppression
+>  psychosis_schiz_bipolar asplenia"
+
+. 
+. foreach var of local desc {
+  2.     tab `var'
+  3. }
+
+       ageg |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |      2,944       37.07       37.07
+          2 |      3,143       39.57       76.64
+          3 |      1,371       17.26       93.91
+          4 |        484        6.09      100.00
+------------+-----------------------------------
+      Total |      7,942      100.00
+
+       sex2 |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          F |      5,090       50.90       50.90
+          M |      4,910       49.10      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+              bmi2 |      Freq.     Percent        Cum.
+-------------------+-----------------------------------
+         Not obese |      6,993       69.93       69.93
+ Obese I (30-34.9) |        994        9.94       79.87
+Obese II (35-39.9) |      1,021       10.21       90.08
+   Obese III (40+) |        992        9.92      100.00
+-------------------+-----------------------------------
+             Total |     10,000      100.00
+
+   carehome |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      8,493       84.93       84.93
+          1 |      1,507       15.07      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+has_follow_ |
+up_previous |
+      _year |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        500        5.00        5.00
+          1 |      9,500       95.00      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+ethnicity_1 |
+          6 |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |        462        6.16        6.16
+          2 |        462        6.16       12.32
+          3 |        479        6.39       18.71
+          4 |        485        6.47       25.17
+          5 |        444        5.92       31.09
+          6 |        452        6.03       37.12
+          7 |        502        6.69       43.81
+          8 |        447        5.96       49.77
+          9 |        457        6.09       55.87
+         10 |        470        6.27       62.13
+         11 |        469        6.25       68.39
+         12 |        501        6.68       75.07
+         13 |        457        6.09       81.16
+         14 |        452        6.03       87.19
+         15 |        500        6.67       93.85
+         16 |        461        6.15      100.00
+------------+-----------------------------------
+      Total |      7,500      100.00
+
+  ethnicity |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |      1,534       20.45       20.45
+          2 |      1,457       19.43       39.88
+          3 |      1,552       20.69       60.57
+          4 |      1,505       20.07       80.64
+          5 |      1,452       19.36      100.00
+------------+-----------------------------------
+      Total |      7,500      100.00
+
+                 region2 |      Freq.     Percent        Cum.
+-------------------------+-----------------------------------
+           East Midlands |      1,009       10.09       10.09
+         East of England |        944        9.44       19.53
+                  London |      1,010       10.10       29.63
+              North East |      1,022       10.22       39.85
+              North West |        934        9.34       49.19
+              South East |      1,960       19.60       68.79
+           West Midlands |      1,064       10.64       79.43
+Yorkshire and the Humber |      2,057       20.57      100.00
+-------------------------+-----------------------------------
+                   Total |     10,000      100.00
+
+        imd |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |        508        5.08        5.08
+          1 |      1,870       18.70       23.78
+          2 |      1,950       19.50       43.28
+          3 |      1,874       18.74       62.02
+          4 |      1,920       19.20       81.22
+          5 |      1,878       18.78      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+chronic_car |
+diac_diseas |
+          e |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      9,300       93.00       93.00
+          1 |        700        7.00      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+diabetes_ty |
+       pe_1 |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      9,900       99.00       99.00
+          1 |        100        1.00      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+diabetes_ty |
+       pe_2 |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      9,300       93.00       93.00
+          1 |        700        7.00      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+diabetes_un |
+ known_type |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      9,900       99.00       99.00
+          1 |        100        1.00      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+current_cop |
+          d |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      9,600       96.00       96.00
+          1 |        400        4.00      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+     dmards |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      9,500       95.00       95.00
+          1 |        500        5.00      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+   dementia |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      9,800       98.00       98.00
+          1 |        200        2.00      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+   dialysis |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      9,900       99.00       99.00
+          1 |        100        1.00      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+solid_organ |
+_transplant |
+      ation |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      9,900       99.00       99.00
+          1 |        100        1.00      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+chemo_or_ra |
+        dio |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      9,900       99.00       99.00
+          1 |        100        1.00      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+intel_dis_i |
+ncl_downs_s |
+    yndrome |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      9,900       99.00       99.00
+          1 |        100        1.00      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+lung_cancer |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      9,900       99.00       99.00
+          1 |        100        1.00      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+cancer_excl |
+_lung_and_h |
+        aem |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      9,900       99.00       99.00
+          1 |        100        1.00      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+haematologi |
+ cal_cancer |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      9,900       99.00       99.00
+          1 |        100        1.00      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+bone_marrow |
+_transplant |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      9,900       99.00       99.00
+          1 |        100        1.00      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+cystic_fibr |
+       osis |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      9,900       99.00       99.00
+          1 |        100        1.00      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+sickle_cell |
+   _disease |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      9,900       99.00       99.00
+          1 |        100        1.00      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+permanant_i |
+mmunosuppre |
+      ssion |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      9,900       99.00       99.00
+          1 |        100        1.00      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+temporary_i |
+mmunosuppre |
+      ssion |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      9,900       99.00       99.00
+          1 |        100        1.00      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+psychosis_s |
+chiz_bipola |
+          r |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      9,900       99.00       99.00
+          1 |        100        1.00      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+   asplenia |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      9,980       99.80       99.80
+          1 |         20        0.20      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+. 
+. //Pfizer vaccine doses 1 and 2
+. gen pfizerd1 = covid_vax_pfizer_1_date2
+(8,000 missing values generated)
+
+. recode pfizerd1 min/max=1
+(pfizerd1: 2000 changes made)
+
+. 
+. gen pfizerd2 = covid_vax_pfizer_2_date2
+(8,000 missing values generated)
+
+. recode pfizerd2 min/max=1
+(pfizerd2: 2000 changes made)
+
+. 
+. 
+. //time between pfizer vaccine dose 1 and either a positive or negative test
+. gen timevacpfd1neg = negative_test_result_1_date2-covid_vax_pfizer_1_date2
+(9,596 missing values generated)
+
+. recode timevacpfd1neg 0/20=1 21/max=2
+(timevacpfd1neg: 363 changes made)
+
+. recode timevacpfd1neg min/-1=.
+(timevacpfd1neg: 39 changes made)
+
+. tab timevacpfd1neg
+
+timevacpfd1 |
+        neg |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         38       10.41       10.41
+          2 |        327       89.59      100.00
+------------+-----------------------------------
+      Total |        365      100.00
+
+. 
+. gen timevacpfd1pos = positive_test_1_date2-covid_vax_pfizer_1_date2
+(9,595 missing values generated)
+
+. recode timevacpfd1pos 0/20=1 21/max=2
+(timevacpfd1pos: 362 changes made)
+
+. recode timevacpfd1pos min/-1=.
+(timevacpfd1pos: 41 changes made)
+
+. tab timevacpfd1pos
+
+timevacpfd1 |
+        pos |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         36        9.89        9.89
+          2 |        328       90.11      100.00
+------------+-----------------------------------
+      Total |        364      100.00
+
+. 
+. gen timevacpfizerd1=timevacpfd1pos
+(9,636 missing values generated)
+
+. recode timevacpfizerd1 .=1 if timevacpfd1neg==1
+(timevacpfizerd1: 35 changes made)
+
+. recode timevacpfizerd1 .=2 if timevacpfd1neg==2
+(timevacpfizerd1: 261 changes made)
+
+. tab timevacpfizerd1
+
+timevacpfiz |
+       erd1 |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         71       10.76       10.76
+          2 |        589       89.24      100.00
+------------+-----------------------------------
+      Total |        660      100.00
+
+. 
+. //time between pfizer vaccine dose 2 and either a positive or negative test
+. gen timevacpfd2neg = negative_test_result_1_date2-covid_vax_pfizer_2_date2
+(9,589 missing values generated)
+
+. recode timevacpfd2neg 0/13=1 14/max=2
+(timevacpfd2neg: 364 changes made)
+
+. recode timevacpfd2neg min/-1=.
+(timevacpfd2neg: 45 changes made)
+
+. tab timevacpfd2neg
+
+timevacpfd2 |
+        neg |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         39       10.66       10.66
+          2 |        327       89.34      100.00
+------------+-----------------------------------
+      Total |        366      100.00
+
+. 
+. gen timevacpfd2pos = positive_test_1_date2-covid_vax_pfizer_2_date2
+(9,621 missing values generated)
+
+. recode timevacpfd2pos 0/13=1 14/max=2
+(timevacpfd2pos: 340 changes made)
+
+. recode timevacpfd2pos min/-1=.
+(timevacpfd2pos: 36 changes made)
+
+. tab timevacpfd2pos
+
+timevacpfd2 |
+        pos |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         30        8.75        8.75
+          2 |        313       91.25      100.00
+------------+-----------------------------------
+      Total |        343      100.00
+
+. 
+. gen timevacpfizerd2=timevacpfd2pos
+(9,657 missing values generated)
+
+. recode timevacpfizerd2 .=1 if timevacpfd2neg==1
+(timevacpfizerd2: 36 changes made)
+
+. recode timevacpfizerd2 .=2 if timevacpfd2neg==2
+(timevacpfizerd2: 269 changes made)
+
+. tab timevacpfizerd2
+
+timevacpfiz |
+       erd2 |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         66       10.19       10.19
+          2 |        582       89.81      100.00
+------------+-----------------------------------
+      Total |        648      100.00
+
+. 
+. //** AZ VACCINE doses 1 and 2 (LL added)
+. 
+. gen azd1 = covid_vax_az_1_date2
+(8,000 missing values generated)
+
+. recode azd1 min/max=1
+(azd1: 2000 changes made)
+
+. 
+. gen azd2 = covid_vax_az_2_date2
+(8,000 missing values generated)
+
+. recode azd2 min/max=1
+(azd2: 2000 changes made)
+
+. 
+. //time between AZ vaccine dose 1 and either a positive or negative test
+. gen timevacazd1neg = negative_test_result_1_date2-covid_vax_az_1_date2
+(9,627 missing values generated)
+
+. recode timevacazd1neg 0/20=1 21/max=2
+(timevacazd1neg: 332 changes made)
+
+. recode timevacazd1neg min/-1=.
+(timevacazd1neg: 39 changes made)
+
+. tab timevacazd1neg
+
+timevacazd1 |
+        neg |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         39       11.68       11.68
+          2 |        295       88.32      100.00
+------------+-----------------------------------
+      Total |        334      100.00
+
+. 
+. gen timevacazd1pos = positive_test_1_date2-covid_vax_az_1_date2
+(9,605 missing values generated)
+
+. recode timevacazd1pos 0/20=1 21/max=2
+(timevacazd1pos: 360 changes made)
+
+. recode timevacazd1pos min/-1=.
+(timevacazd1pos: 33 changes made)
+
+. tab timevacazd1pos
+
+timevacazd1 |
+        pos |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         50       13.81       13.81
+          2 |        312       86.19      100.00
+------------+-----------------------------------
+      Total |        362      100.00
+
+. 
+. gen timevacazd1=timevacazd1pos
+(9,638 missing values generated)
+
+. recode timevacazd1 .=1 if timevacazd1neg==1
+(timevacazd1: 37 changes made)
+
+. recode timevacazd1 .=2 if timevacazd1neg==2
+(timevacazd1: 248 changes made)
+
+. tab timevacazd1
+
+timevacazd1 |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         87       13.45       13.45
+          2 |        560       86.55      100.00
+------------+-----------------------------------
+      Total |        647      100.00
+
+. 
+. //time between AZ vaccine dose 2 and either a positive or negative test
+. gen timevacazd2neg = negative_test_result_1_date2-covid_vax_az_2_date2
+(9,616 missing values generated)
+
+. recode timevacazd2neg 0/13=1 14/max=2
+(timevacazd2neg: 319 changes made)
+
+. recode timevacazd2neg min/-1=.
+(timevacazd2neg: 60 changes made)
+
+. tab timevacazd2neg
+
+timevacazd2 |
+        neg |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         42       12.96       12.96
+          2 |        282       87.04      100.00
+------------+-----------------------------------
+      Total |        324      100.00
+
+. 
+. gen timevacazd2pos = positive_test_1_date2-covid_vax_az_2_date2
+(9,607 missing values generated)
+
+. recode timevacazd2pos 0/13=1 14/max=2
+(timevacazd2pos: 350 changes made)
+
+. recode timevacazd2pos min/-1=.
+(timevacazd2pos: 40 changes made)
+
+. tab timevacazd2pos
+
+timevacazd2 |
+        pos |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         40       11.33       11.33
+          2 |        313       88.67      100.00
+------------+-----------------------------------
+      Total |        353      100.00
+
+. 
+. gen timevacazd2=timevacazd2pos
+(9,647 missing values generated)
+
+. recode timevacazd2 .=1 if timevacazd2neg==1
+(timevacazd2: 39 changes made)
+
+. recode timevacazd2 .=2 if timevacazd2neg==2
+(timevacazd2: 242 changes made)
+
+. tab timevacazd2
+
+timevacazd2 |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          1 |         79       12.46       12.46
+          2 |        555       87.54      100.00
+------------+-----------------------------------
+      Total |        634      100.00
+
+. 
+. 
+. //to get unvaccinated people (1=unvaccinated, 0=vaccinated)
+. gen novaccine=1
+
+. recode novaccine 1=0 if timevacpfizerd1==1|timevacpfizerd2==1|timevacazd1==1|
+> timevacazd2==1|timevacpfizerd1==2|timevacpfizerd2==2|timevacazd1==2|timevacaz
+> d2==2
+(novaccine: 2000 changes made)
+
+. recode novaccine 0=2 if covid_vax_pfizer_1_date2>positive_test_1_date2
+(novaccine: 732 changes made)
+
+. recode novaccine 0=2 if covid_vax_az_1_date2 > positive_test_1_date2
+(novaccine: 300 changes made)
+
+. 
+. 
+. gen pd1t1 = timevacpfizerd1
+(9,340 missing values generated)
+
+. recode pd1t1 2=.
+(pd1t1: 589 changes made)
+
+. recode pd1t1 .=0 if novaccine==1
+(pd1t1: 8000 changes made)
+
+. tab pd1t1
+
+      pd1t1 |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      8,000       99.12       99.12
+          1 |         71        0.88      100.00
+------------+-----------------------------------
+      Total |      8,071      100.00
+
+. 
+. gen pd1t2 = timevacpfizerd1
+(9,340 missing values generated)
+
+. recode pd1t2 1=. 
+(pd1t2: 71 changes made)
+
+. recode pd1t2 .=0 if novaccine==1
+(pd1t2: 8000 changes made)
+
+. recode pd1t2 2=1
+(pd1t2: 589 changes made)
+
+. tab pd1t2
+
+      pd1t2 |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      8,000       93.14       93.14
+          1 |        589        6.86      100.00
+------------+-----------------------------------
+      Total |      8,589      100.00
+
+. 
+. 
+. gen pd2t1 = timevacpfizerd2
+(9,352 missing values generated)
+
+. recode pd2t1 2=. 
+(pd2t1: 582 changes made)
+
+. recode pd2t1 .=0 if novaccine==1
+(pd2t1: 8000 changes made)
+
+. tab pd2t1
+
+      pd2t1 |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      8,000       99.18       99.18
+          1 |         66        0.82      100.00
+------------+-----------------------------------
+      Total |      8,066      100.00
+
+. 
+. gen pd2t2 = timevacpfizerd2
+(9,352 missing values generated)
+
+. recode pd2t2 1=. 
+(pd2t2: 66 changes made)
+
+. recode pd2t2 .=0 if novaccine==1
+(pd2t2: 8000 changes made)
+
+. recode pd2t2 2=1
+(pd2t2: 582 changes made)
+
+. tab pd2t2
+
+      pd2t2 |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      8,000       93.22       93.22
+          1 |        582        6.78      100.00
+------------+-----------------------------------
+      Total |      8,582      100.00
+
+. 
+. gen az1t1 = timevacazd1
+(9,353 missing values generated)
+
+. recode az1t1 2=.
+(az1t1: 560 changes made)
+
+. recode az1t1 .=0 if novaccine==1
+(az1t1: 8000 changes made)
+
+. tab az1t1
+
+      az1t1 |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      8,000       98.92       98.92
+          1 |         87        1.08      100.00
+------------+-----------------------------------
+      Total |      8,087      100.00
+
+. 
+. gen az1t2 = timevacazd1
+(9,353 missing values generated)
+
+. recode az1t2 1=. 
+(az1t2: 87 changes made)
+
+. recode az1t2 .=0 if novaccine==1
+(az1t2: 8000 changes made)
+
+. recode az1t2 2=1
+(az1t2: 560 changes made)
+
+. tab az1t2
+
+      az1t2 |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      8,000       93.46       93.46
+          1 |        560        6.54      100.00
+------------+-----------------------------------
+      Total |      8,560      100.00
+
+. 
+. 
+. gen az2t1 = timevacazd2
+(9,366 missing values generated)
+
+. recode az2t1 2=. 
+(az2t1: 555 changes made)
+
+. recode az2t1 .=0 if novaccine==1
+(az2t1: 8000 changes made)
+
+. tab az2t1
+
+      az2t1 |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      8,000       99.02       99.02
+          1 |         79        0.98      100.00
+------------+-----------------------------------
+      Total |      8,079      100.00
+
+. 
+. gen az2t2 = timevacazd2
+(9,366 missing values generated)
+
+. recode az2t2 1=. 
+(az2t2: 79 changes made)
+
+. recode az2t2 .=0 if novaccine==1
+(az2t2: 8000 changes made)
+
+. recode az2t2 2=1
+(az2t2: 555 changes made)
+
+. tab az2t2
+
+      az2t2 |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      8,000       93.51       93.51
+          1 |        555        6.49      100.00
+------------+-----------------------------------
+      Total |      8,555      100.00
+
+. 
+. gen symptoms=0
+
+. recode symptoms 0=1 if symptomatic_people=="Y"
+(symptoms: 3000 changes made)
+
+. tab symptoms
+
+   symptoms |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      7,000       70.00       70.00
+          1 |      3,000       30.00      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+. 
+. 
+. // vaccine % and univariate analysis //- by age group, any type, d1, d2- grou
+> sp 0-20- 21+ and D2 14+ and time period before janry 8th and after
+.                 
+. 
+. local desc2 "pd1t1 pd1t2 pd2t1 pd2t2 az1t1 az1t2 az2t1 az2t2 sex2 bmi2 careho
+> me has_follow_up_previous_year  ethnicity region2 imd chronic_cardiac_disease
+>  diabetes_type_1 diabetes_type_2 diabetes_unknown_type current_copd dmards de
+> mentia dialysis solid_organ_transplantation chemo_or_radio intel_dis_incl_dow
+> ns_syndrome lung_cancer cancer_excl_lung_and_haem haematological_cancer bone_
+> marrow_transplant cystic_fibrosis sickle_cell_disease permanant_immunosuppres
+> sion temporary_immunosuppression psychosis_schiz_bipolar asplenia"
+
+. 
+.         
+. foreach var of local desc2 {
+  2. tab `var' covid2, col
+  3. mhodds  covid2 `var'
+  4. }       
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+           |        covid2
+     pd1t1 |         0          1 |     Total
+-----------+----------------------+----------
+         0 |       707        904 |     1,611 
+           |     95.28      96.17 |     95.78 
+-----------+----------------------+----------
+         1 |        35         36 |        71 
+           |      4.72       3.83 |      4.22 
+-----------+----------------------+----------
+     Total |       742        940 |     1,682 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing pd1t1==1 vs. pd1t1==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       0.804425       0.81        0.3691         0.499858   1.294567
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+           |        covid2
+     pd1t2 |         0          1 |     Total
+-----------+----------------------+----------
+         0 |       707        904 |     1,611 
+           |     73.04      73.38 |     73.23 
+-----------+----------------------+----------
+         1 |       261        328 |       589 
+           |     26.96      26.62 |     26.77 
+-----------+----------------------+----------
+     Total |       968      1,232 |     2,200 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing pd1t2==1 vs. pd1t2==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       0.982843       0.03        0.8584         0.812708   1.188596
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+           |        covid2
+     pd2t1 |         0          1 |     Total
+-----------+----------------------+----------
+         0 |       707        904 |     1,611 
+           |     95.28      96.68 |     96.06 
+-----------+----------------------+----------
+         1 |        35         31 |        66 
+           |      4.72       3.32 |      3.94 
+-----------+----------------------+----------
+     Total |       742        935 |     1,677 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing pd2t1==1 vs. pd2t1==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       0.692699       2.15        0.1428         0.422766   1.134981
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+           |        covid2
+     pd2t2 |         0          1 |     Total
+-----------+----------------------+----------
+         0 |       707        904 |     1,611 
+           |     72.44      74.28 |     73.46 
+-----------+----------------------+----------
+         1 |       269        313 |       582 
+           |     27.56      25.72 |     26.54 
+-----------+----------------------+----------
+     Total |       976      1,217 |     2,193 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing pd2t2==1 vs. pd2t2==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       0.910003       0.94        0.3316         0.752202   1.100909
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+           |        covid2
+     az1t1 |         0          1 |     Total
+-----------+----------------------+----------
+         0 |       707        904 |     1,611 
+           |     95.28      94.56 |     94.88 
+-----------+----------------------+----------
+         1 |        35         52 |        87 
+           |      4.72       5.44 |      5.12 
+-----------+----------------------+----------
+     Total |       742        956 |     1,698 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing az1t1==1 vs. az1t1==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       1.161947       0.45        0.5032         0.748440   1.803913
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+           |        covid2
+     az1t2 |         0          1 |     Total
+-----------+----------------------+----------
+         0 |       707        904 |     1,611 
+           |     74.11      74.28 |     74.21 
+-----------+----------------------+----------
+         1 |       247        313 |       560 
+           |     25.89      25.72 |     25.79 
+-----------+----------------------+----------
+     Total |       954      1,217 |     2,171 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing az1t2==1 vs. az1t2==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       0.991056       0.01        0.9276         0.816524   1.202896
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+           |        covid2
+     az2t1 |         0          1 |     Total
+-----------+----------------------+----------
+         0 |       707        904 |     1,611 
+           |     94.77      95.76 |     95.33 
+-----------+----------------------+----------
+         1 |        39         40 |        79 
+           |      5.23       4.24 |      4.67 
+-----------+----------------------+----------
+     Total |       746        944 |     1,690 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing az2t1==1 vs. az2t1==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       0.802133       0.92        0.3382         0.510358   1.260717
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+           |        covid2
+     az2t2 |         0          1 |     Total
+-----------+----------------------+----------
+         0 |       707        904 |     1,611 
+           |     74.58      74.22 |     74.38 
+-----------+----------------------+----------
+         1 |       241        314 |       555 
+           |     25.42      25.78 |     25.62 
+-----------+----------------------+----------
+     Total |       948      1,218 |     2,166 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing az2t2==1 vs. az2t2==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       1.018975       0.04        0.8498         0.838772   1.237894
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+           |        covid2
+      sex2 |         0          1 |     Total
+-----------+----------------------+----------
+         F |       817      1,034 |     1,851 
+           |     50.71      51.70 |     51.26 
+-----------+----------------------+----------
+         M |       794        966 |     1,760 
+           |     49.29      48.30 |     48.74 
+-----------+----------------------+----------
+     Total |     1,611      2,000 |     3,611 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing sex2==2 vs. sex2==1
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       0.961298       0.35        0.5557         0.843020   1.096172
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+                   |        covid2
+              bmi2 |         0          1 |     Total
+-------------------+----------------------+----------
+         Not obese |     1,139      1,386 |     2,525 
+                   |     70.70      69.30 |     69.93 
+-------------------+----------------------+----------
+ Obese I (30-34.9) |       164        192 |       356 
+                   |     10.18       9.60 |      9.86 
+-------------------+----------------------+----------
+Obese II (35-39.9) |       156        208 |       364 
+                   |      9.68      10.40 |     10.08 
+-------------------+----------------------+----------
+   Obese III (40+) |       152        214 |       366 
+                   |      9.44      10.70 |     10.14 
+-------------------+----------------------+----------
+             Total |     1,611      2,000 |     3,611 
+                   |    100.00     100.00 |    100.00 
+
+Score test for trend of odds with bmi2
+
+(The Odds Ratio estimate is an approximation to the odds ratio 
+for a one unit increase in bmi2)
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       1.045295       1.84        0.1753         0.980435   1.114446
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+           |        covid2
+  carehome |         0          1 |     Total
+-----------+----------------------+----------
+         0 |     1,368      1,717 |     3,085 
+           |     84.92      85.85 |     85.43 
+-----------+----------------------+----------
+         1 |       243        283 |       526 
+           |     15.08      14.15 |     14.57 
+-----------+----------------------+----------
+     Total |     1,611      2,000 |     3,611 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing carehome==1 vs. carehome==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       0.927889       0.63        0.4292         0.770718   1.117111
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+has_follow |
+_up_previo |        covid2
+   us_year |         0          1 |     Total
+-----------+----------------------+----------
+         0 |        91         93 |       184 
+           |      5.65       4.65 |      5.10 
+-----------+----------------------+----------
+         1 |     1,520      1,907 |     3,427 
+           |     94.35      95.35 |     94.90 
+-----------+----------------------+----------
+     Total |     1,611      2,000 |     3,611 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing has_follow~r==1 vs. has_follow~r==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       1.227625       1.84        0.1750         0.912299   1.651938
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+           |        covid2
+ ethnicity |         0          1 |     Total
+-----------+----------------------+----------
+         1 |       241        313 |       554 
+           |     20.30      20.85 |     20.61 
+-----------+----------------------+----------
+         2 |       246        292 |       538 
+           |     20.72      19.45 |     20.01 
+-----------+----------------------+----------
+         3 |       229        329 |       558 
+           |     19.29      21.92 |     20.76 
+-----------+----------------------+----------
+         4 |       229        291 |       520 
+           |     19.29      19.39 |     19.35 
+-----------+----------------------+----------
+         5 |       242        276 |       518 
+           |     20.39      18.39 |     19.27 
+-----------+----------------------+----------
+     Total |     1,187      1,501 |     2,688 
+           |    100.00     100.00 |    100.00 
+
+Score test for trend of odds with ethnicity
+
+(The Odds Ratio estimate is an approximation to the odds ratio 
+for a one unit increase in ethnicity)
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       0.981402       0.46        0.4955         0.929824   1.035841
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+                      |        covid2
+              region2 |         0          1 |     Total
+----------------------+----------------------+----------
+        East Midlands |       156        191 |       347 
+                      |      9.68       9.55 |      9.61 
+----------------------+----------------------+----------
+      East of England |       162        183 |       345 
+                      |     10.06       9.15 |      9.55 
+----------------------+----------------------+----------
+               London |       154        217 |       371 
+                      |      9.56      10.85 |     10.27 
+----------------------+----------------------+----------
+           North East |       166        193 |       359 
+                      |     10.30       9.65 |      9.94 
+----------------------+----------------------+----------
+           North West |       157        192 |       349 
+                      |      9.75       9.60 |      9.66 
+----------------------+----------------------+----------
+           South East |       322        414 |       736 
+                      |     19.99      20.70 |     20.38 
+----------------------+----------------------+----------
+        West Midlands |       172        222 |       394 
+                      |     10.68      11.10 |     10.91 
+----------------------+----------------------+----------
+Yorkshire and the Hum |       322        388 |       710 
+                      |     19.99      19.40 |     19.66 
+----------------------+----------------------+----------
+                Total |     1,611      2,000 |     3,611 
+                      |    100.00     100.00 |    100.00 
+
+Score test for trend of odds with region2
+
+(The Odds Ratio estimate is an approximation to the odds ratio 
+for a one unit increase in region2)
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       1.002109       0.02        0.8846         0.973998   1.031032
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+           |        covid2
+       imd |         0          1 |     Total
+-----------+----------------------+----------
+         0 |        82        113 |       195 
+           |      5.09       5.65 |      5.40 
+-----------+----------------------+----------
+         1 |       326        370 |       696 
+           |     20.24      18.50 |     19.27 
+-----------+----------------------+----------
+         2 |       313        385 |       698 
+           |     19.43      19.25 |     19.33 
+-----------+----------------------+----------
+         3 |       311        366 |       677 
+           |     19.30      18.30 |     18.75 
+-----------+----------------------+----------
+         4 |       320        397 |       717 
+           |     19.86      19.85 |     19.86 
+-----------+----------------------+----------
+         5 |       259        369 |       628 
+           |     16.08      18.45 |     17.39 
+-----------+----------------------+----------
+     Total |     1,611      2,000 |     3,611 
+           |    100.00     100.00 |    100.00 
+
+Score test for trend of odds with imd
+
+(The Odds Ratio estimate is an approximation to the odds ratio 
+for a one unit increase in imd)
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       1.029478       1.74        0.1874         0.985956   1.074922
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+chronic_ca |
+rdiac_dise |        covid2
+       ase |         0          1 |     Total
+-----------+----------------------+----------
+         0 |     1,509      1,862 |     3,371 
+           |     93.67      93.10 |     93.35 
+-----------+----------------------+----------
+         1 |       102        138 |       240 
+           |      6.33       6.90 |      6.65 
+-----------+----------------------+----------
+     Total |     1,611      2,000 |     3,611 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing chronic_ca~e==1 vs. chronic_ca~e==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       1.096449       0.46        0.4954         0.841345   1.428904
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+diabetes_t |        covid2
+     ype_1 |         0          1 |     Total
+-----------+----------------------+----------
+         0 |     1,596      1,977 |     3,573 
+           |     99.07      98.85 |     98.95 
+-----------+----------------------+----------
+         1 |        15         23 |        38 
+           |      0.93       1.15 |      1.05 
+-----------+----------------------+----------
+     Total |     1,611      2,000 |     3,611 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing diabetes_t~1==1 vs. diabetes_t~1==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       1.237835       0.41        0.5217         0.643667   2.380478
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+diabetes_t |        covid2
+     ype_2 |         0          1 |     Total
+-----------+----------------------+----------
+         0 |     1,499      1,862 |     3,361 
+           |     93.05      93.10 |     93.08 
+-----------+----------------------+----------
+         1 |       112        138 |       250 
+           |      6.95       6.90 |      6.92 
+-----------+----------------------+----------
+     Total |     1,611      2,000 |     3,611 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing diabetes_t~2==1 vs. diabetes_t~2==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       0.991935       0.00        0.9510         0.766044   1.284436
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+diabetes_u |
+nknown_typ |        covid2
+         e |         0          1 |     Total
+-----------+----------------------+----------
+         0 |     1,594      1,981 |     3,575 
+           |     98.94      99.05 |     99.00 
+-----------+----------------------+----------
+         1 |        17         19 |        36 
+           |      1.06       0.95 |      1.00 
+-----------+----------------------+----------
+     Total |     1,611      2,000 |     3,611 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing diabetes_u~e==1 vs. diabetes_u~e==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       0.899308       0.10        0.7517         0.465857   1.736059
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+current_co |        covid2
+        pd |         0          1 |     Total
+-----------+----------------------+----------
+         0 |     1,544      1,911 |     3,455 
+           |     95.84      95.55 |     95.68 
+-----------+----------------------+----------
+         1 |        67         89 |       156 
+           |      4.16       4.45 |      4.32 
+-----------+----------------------+----------
+     Total |     1,611      2,000 |     3,611 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing current_copd==1 vs. current_copd==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       1.073252       0.18        0.6689         0.776165   1.484054
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+           |        covid2
+    dmards |         0          1 |     Total
+-----------+----------------------+----------
+         0 |     1,546      1,889 |     3,435 
+           |     95.97      94.45 |     95.13 
+-----------+----------------------+----------
+         1 |        65        111 |       176 
+           |      4.03       5.55 |      4.87 
+-----------+----------------------+----------
+     Total |     1,611      2,000 |     3,611 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing dmards==1 vs. dmards==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       1.397614       4.42        0.0356         1.021346   1.912500
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+           |        covid2
+  dementia |         0          1 |     Total
+-----------+----------------------+----------
+         0 |     1,576      1,978 |     3,554 
+           |     97.83      98.90 |     98.42 
+-----------+----------------------+----------
+         1 |        35         22 |        57 
+           |      2.17       1.10 |      1.58 
+-----------+----------------------+----------
+     Total |     1,611      2,000 |     3,611 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing dementia==1 vs. dementia==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       0.500823       6.61        0.0102         0.292462   0.857630
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+           |        covid2
+  dialysis |         0          1 |     Total
+-----------+----------------------+----------
+         0 |     1,594      1,981 |     3,575 
+           |     98.94      99.05 |     99.00 
+-----------+----------------------+----------
+         1 |        17         19 |        36 
+           |      1.06       0.95 |      1.00 
+-----------+----------------------+----------
+     Total |     1,611      2,000 |     3,611 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing dialysis==1 vs. dialysis==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       0.899308       0.10        0.7517         0.465857   1.736059
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+solid_orga |
+n_transpla |        covid2
+   ntation |         0          1 |     Total
+-----------+----------------------+----------
+         0 |     1,591      1,981 |     3,572 
+           |     98.76      99.05 |     98.92 
+-----------+----------------------+----------
+         1 |        20         19 |        39 
+           |      1.24       0.95 |      1.08 
+-----------+----------------------+----------
+     Total |     1,611      2,000 |     3,611 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing solid_orga~n==1 vs. solid_orga~n==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       0.762973       0.71        0.3997         0.405743   1.434723
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+chemo_or_r |        covid2
+      adio |         0          1 |     Total
+-----------+----------------------+----------
+         0 |     1,595      1,982 |     3,577 
+           |     99.01      99.10 |     99.06 
+-----------+----------------------+----------
+         1 |        16         18 |        34 
+           |      0.99       0.90 |      0.94 
+-----------+----------------------+----------
+     Total |     1,611      2,000 |     3,611 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing chemo_or_r~o==1 vs. chemo_or_r~o==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       0.905336       0.08        0.7732         0.460152   1.781222
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+intel_dis_ |
+incl_downs |        covid2
+ _syndrome |         0          1 |     Total
+-----------+----------------------+----------
+         0 |     1,604      1,978 |     3,582 
+           |     99.57      98.90 |     99.20 
+-----------+----------------------+----------
+         1 |         7         22 |        29 
+           |      0.43       1.10 |      0.80 
+-----------+----------------------+----------
+     Total |     1,611      2,000 |     3,611 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing intel_dis_~e==1 vs. intel_dis_~e==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       2.548606       4.96        0.0260         1.085208   5.985390
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+lung_cance |        covid2
+         r |         0          1 |     Total
+-----------+----------------------+----------
+         0 |     1,590      1,974 |     3,564 
+           |     98.70      98.70 |     98.70 
+-----------+----------------------+----------
+         1 |        21         26 |        47 
+           |      1.30       1.30 |      1.30 
+-----------+----------------------+----------
+     Total |     1,611      2,000 |     3,611 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing lung_cancer==1 vs. lung_cancer==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       0.997250       0.00        0.9926         0.558971   1.779176
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+cancer_exc |
+l_lung_and |        covid2
+     _haem |         0          1 |     Total
+-----------+----------------------+----------
+         0 |     1,589      1,978 |     3,567 
+           |     98.63      98.90 |     98.78 
+-----------+----------------------+----------
+         1 |        22         22 |        44 
+           |      1.37       1.10 |      1.22 
+-----------+----------------------+----------
+     Total |     1,611      2,000 |     3,611 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing cancer_exc~m==1 vs. cancer_exc~m==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       0.803337       0.52        0.4696         0.443199   1.456116
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+haematolog |
+ical_cance |        covid2
+         r |         0          1 |     Total
+-----------+----------------------+----------
+         0 |     1,594      1,980 |     3,574 
+           |     98.94      99.00 |     98.98 
+-----------+----------------------+----------
+         1 |        17         20 |        37 
+           |      1.06       1.00 |      1.02 
+-----------+----------------------+----------
+     Total |     1,611      2,000 |     3,611 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing haematolog~r==1 vs. haematolog~r==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       0.947118       0.03        0.8699         0.494435   1.814259
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+bone_marro |
+w_transpla |        covid2
+        nt |         0          1 |     Total
+-----------+----------------------+----------
+         0 |     1,591      1,983 |     3,574 
+           |     98.76      99.15 |     98.98 
+-----------+----------------------+----------
+         1 |        20         17 |        37 
+           |      1.24       0.85 |      1.02 
+-----------+----------------------+----------
+     Total |     1,611      2,000 |     3,611 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing bone_marro~t==1 vs. bone_marro~t==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       0.681972       1.35        0.2456         0.355975   1.306513
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+cystic_fib |        covid2
+     rosis |         0          1 |     Total
+-----------+----------------------+----------
+         0 |     1,596      1,980 |     3,576 
+           |     99.07      99.00 |     99.03 
+-----------+----------------------+----------
+         1 |        15         20 |        35 
+           |      0.93       1.00 |      0.97 
+-----------+----------------------+----------
+     Total |     1,611      2,000 |     3,611 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing cystic_fib~s==1 vs. cystic_fib~s==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       1.074747       0.04        0.8336         0.548425   2.106182
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+sickle_cel |        covid2
+ l_disease |         0          1 |     Total
+-----------+----------------------+----------
+         0 |     1,595      1,978 |     3,573 
+           |     99.01      98.90 |     98.95 
+-----------+----------------------+----------
+         1 |        16         22 |        38 
+           |      0.99       1.10 |      1.05 
+-----------+----------------------+----------
+     Total |     1,611      2,000 |     3,611 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing sickle_cel~e==1 vs. sickle_cel~e==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       1.108759       0.10        0.7545         0.580306   2.118447
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+permanant_ |
+immunosupp |        covid2
+   ression |         0          1 |     Total
+-----------+----------------------+----------
+         0 |     1,598      1,981 |     3,579 
+           |     99.19      99.05 |     99.11 
+-----------+----------------------+----------
+         1 |        13         19 |        32 
+           |      0.81       0.95 |      0.89 
+-----------+----------------------+----------
+     Total |     1,611      2,000 |     3,611 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing permanant_~n==1 vs. permanant_~n==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       1.178969       0.21        0.6485         0.580414   2.394787
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+temporary_ |
+immunosupp |        covid2
+   ression |         0          1 |     Total
+-----------+----------------------+----------
+         0 |     1,597      1,981 |     3,578 
+           |     99.13      99.05 |     99.09 
+-----------+----------------------+----------
+         1 |        14         19 |        33 
+           |      0.87       0.95 |      0.91 
+-----------+----------------------+----------
+     Total |     1,611      2,000 |     3,611 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing temporary_~n==1 vs. temporary_~n==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       1.094072       0.06        0.7994         0.546797   2.189100
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+psychosis_ |
+schiz_bipo |        covid2
+       lar |         0          1 |     Total
+-----------+----------------------+----------
+         0 |     1,597      1,979 |     3,576 
+           |     99.13      98.95 |     99.03 
+-----------+----------------------+----------
+         1 |        14         21 |        35 
+           |      0.87       1.05 |      0.97 
+-----------+----------------------+----------
+     Total |     1,611      2,000 |     3,611 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing psychosis_~r==1 vs. psychosis_~r==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       1.210460       0.30        0.5812         0.613497   2.388298
+    ----------------------------------------------------------------
+
++-------------------+
+| Key               |
+|-------------------|
+|     frequency     |
+| column percentage |
++-------------------+
+
+           |        covid2
+  asplenia |         0          1 |     Total
+-----------+----------------------+----------
+         0 |     1,608      1,995 |     3,603 
+           |     99.81      99.75 |     99.78 
+-----------+----------------------+----------
+         1 |         3          5 |         8 
+           |      0.19       0.25 |      0.22 
+-----------+----------------------+----------
+     Total |     1,611      2,000 |     3,611 
+           |    100.00     100.00 |    100.00 
+
+Maximum likelihood estimate of the odds ratio
+Comparing asplenia==1 vs. asplenia==0
+
+    ----------------------------------------------------------------
+     Odds Ratio    chi2(1)        P>chi2        [95% Conf. Interval]
+    ----------------------------------------------------------------
+       1.343358       0.16        0.6854         0.320485   5.630878
+    ----------------------------------------------------------------
+
+. 
+. local desc3 "carehome chronic_cardiac_disease diabetes_type_1 diabetes_type_2
+>  diabetes_unknown_type current_copd dmards dementia dialysis solid_organ_tran
+> splantation chemo_or_radio intel_dis_incl_downs_syndrome lung_cancer cancer_e
+> xcl_lung_and_haem haematological_cancer cystic_fibrosis sickle_cell_disease p
+> ermanant_immunosuppression temporary_immunosuppression psychosis_schiz_bipola
+> r asplenia "
+
+. 
+. foreach var of local desc3 {
+  2. tab `var'
+  3. logistic pd1t1 covid2 if `var'==1
+  4. 
+. logistic pd1t2 covid2 if `var'==1
+  5. 
+. logistic pd2t1 covid2 if `var'==1
+  6. 
+. logistic pd2t2 covid2 if `var'==1
+  7. 
+. logistic az1t1 covid2 if `var'==1
+  8. 
+. logistic az1t2 covid2 if `var'==1
+  9. 
+. logistic az2t1 covid2 if `var'==1
+ 10. 
+. logistic az2t2 covid2 if `var'==1
+ 11. 
+. }
+
+   carehome |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      8,493       84.93       84.93
+          1 |      1,507       15.07      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+Logistic regression                             Number of obs     =        236
+                                                LR chi2(1)        =       0.05
+                                                Prob > chi2       =     0.8253
+Log likelihood =   -61.0686                     Pseudo R2         =     0.0004
+
+------------------------------------------------------------------------------
+       pd1t1 | Odds Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      covid2 |   .8944672   .4513446    -0.22   0.825      .332699    2.404791
+       _cons |   .0824742   .0303377    -6.78   0.000     .0401059    .1696007
+------------------------------------------------------------------------------
+Note: _cons estimates baseline odds.
+
+Logistic regression                             Number of obs     =        311
+                                                LR chi2(1)        =       0.24
+                                                Prob > chi2       =     0.6271
+Log likelihood = -188.74633                     Pseudo R2         =     0.0006
+
+------------------------------------------------------------------------------
+       pd1t2 | Odds Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      covid2 |   1.129853   .2843558     0.49   0.628     .6899155    1.850326
+       _cons |   .3917526   .0749723    -4.90   0.000     .2692227    .5700488
+------------------------------------------------------------------------------
+Note: _cons estimates baseline odds.
+
+Logistic regression                             Number of obs     =        228
+                                                LR chi2(1)        =       4.05
+                                                Prob > chi2       =     0.0443
+Log likelihood =  -35.88637                     Pseudo R2         =     0.0534
+
+------------------------------------------------------------------------------
+       pd2t1 | Odds Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      covid2 |   .2271663   .1847412    -1.82   0.068     .0461435    1.118348
+       _cons |   .0721649   .0282428    -6.72   0.000     .0335117     .155402
+------------------------------------------------------------------------------
+Note: _cons estimates baseline odds.
+
+Logistic regression                             Number of obs     =        299
+                                                LR chi2(1)        =       0.09
+                                                Prob > chi2       =     0.7633
+Log likelihood = -173.61844                     Pseudo R2         =     0.0003
+
+------------------------------------------------------------------------------
+       pd2t2 | Odds Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      covid2 |   .9240142    .242347    -0.30   0.763     .5526226       1.545
+       _cons |   .3814433   .0737048    -4.99   0.000     .2611895     .557063
+------------------------------------------------------------------------------
+Note: _cons estimates baseline odds.
+
+Logistic regression                             Number of obs     =        235
+                                                LR chi2(1)        =       0.28
+                                                Prob > chi2       =     0.5948
+Log likelihood = -58.292999                     Pseudo R2         =     0.0024
+
+------------------------------------------------------------------------------
+       az1t1 | Odds Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      covid2 |   1.325137   .7076436     0.53   0.598     .4652707    3.774119
+       _cons |   .0618557   .0260218    -6.62   0.000     .0271201    .1410806
+------------------------------------------------------------------------------
+Note: _cons estimates baseline odds.
+
+Logistic regression                             Number of obs     =        314
+                                                LR chi2(1)        =       0.13
+                                                Prob > chi2       =     0.7194
+Log likelihood = -192.41985                     Pseudo R2         =     0.0003
+
+------------------------------------------------------------------------------
+       az1t2 | Odds Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      covid2 |   1.093238   .2715278     0.36   0.720      .671895    1.778803
+       _cons |   .4123712   .0774877    -4.71   0.000     .2853258    .5959853
+------------------------------------------------------------------------------
+Note: _cons estimates baseline odds.
+
+Logistic regression                             Number of obs     =        230
+                                                LR chi2(1)        =       0.01
+                                                Prob > chi2       =     0.9397
+Log likelihood = -44.171822                     Pseudo R2         =     0.0001
+
+------------------------------------------------------------------------------
+       az2t1 | Odds Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      covid2 |   .9540983   .5921352    -0.08   0.940      .282695    3.220092
+       _cons |   .0515464   .0236389    -6.47   0.000     .0209817    .1266354
+------------------------------------------------------------------------------
+Note: _cons estimates baseline odds.
+
+Logistic regression                             Number of obs     =        309
+                                                LR chi2(1)        =       0.84
+                                                Prob > chi2       =     0.3608
+Log likelihood = -185.99525                     Pseudo R2         =     0.0022
+
+------------------------------------------------------------------------------
+       az2t2 | Odds Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      covid2 |    .795082   .1994855    -0.91   0.361     .4862348    1.300103
+       _cons |   .4639175   .0836744    -4.26   0.000     .3257721    .6606443
+------------------------------------------------------------------------------
+Note: _cons estimates baseline odds.
+
+chronic_car |
+diac_diseas |
+          e |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      9,300       93.00       93.00
+          1 |        700        7.00      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+
+Logistic regression                             Number of obs     =        128
+                                                LR chi2(1)        =       0.40
+                                                Prob > chi2       =     0.5256
+Log likelihood = -17.598321                     Pseudo R2         =     0.0113
+
+------------------------------------------------------------------------------
+       pd1t1 | Odds Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      covid2 |   2.027027   2.369842     0.60   0.546      .204975    20.04556
+       _cons |        .02    .020199    -3.87   0.000     .0027629    .1447776
+------------------------------------------------------------------------------
+Note: _cons estimates baseline odds.
+
+Logistic regression                             Number of obs     =        161
+                                                LR chi2(1)        =       0.00
+                                                Prob > chi2       =     0.9811
+Log likelihood = -86.786945                     Pseudo R2         =     0.0000
+
+------------------------------------------------------------------------------
+       pd1t2 | Odds Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      covid2 |    .990991   .3781832    -0.02   0.981     .4690652     2.09366
+       _cons |         .3   .0883176    -4.09   0.000     .1684746    .5342053
+------------------------------------------------------------------------------
+Note: _cons estimates baseline odds.
+note: covid2 != 0 predicts failure perfectly
+      covid2 dropped and 74 obs not used
+
+
+Logistic regression                             Number of obs     =         54
+                                                LR chi2(0)        =       0.00
+                                                Prob > chi2       =          .
+Log likelihood = -14.258811                     Pseudo R2         =     0.0000
+
+------------------------------------------------------------------------------
+       pd2t1 | Odds Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      covid2 |          1  (omitted)
+       _cons |        .08   .0415692    -4.86   0.000      .028893    .2215069
+------------------------------------------------------------------------------
+Note: _cons estimates baseline odds.
+
+Logistic regression                             Number of obs     =        159
+                                                LR chi2(1)        =       1.36
+                                                Prob > chi2       =     0.2428
+Log likelihood = -83.121453                     Pseudo R2         =     0.0081
+
+------------------------------------------------------------------------------
+       pd2t2 | Odds Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      covid2 |   .6381381   .2454076    -1.17   0.243       .30031       1.356
+       _cons |        .36   .0989545    -3.72   0.000     .2100533    .6169862
+------------------------------------------------------------------------------
+Note: _cons estimates baseline odds.
+
+Logistic regression                             Number of obs     =        128
+                                                LR chi2(1)        =       0.15
+                                                Prob > chi2       =     0.7006
+Log likelihood = -17.725851                     Pseudo R2         =     0.0042
+
+------------------------------------------------------------------------------
+       az1t1 | Odds Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      covid2 |   .6756757   .6869045    -0.39   0.700     .0921278    4.955479
+       _cons |        .04   .0288444    -4.46   0.000     .0097331     .164388
+------------------------------------------------------------------------------
+Note: _cons estimates baseline odds.
+
+Logistic regression                             Number of obs     =        159
+                                                LR chi2(1)        =       0.93
+                                                Prob > chi2       =     0.3345
+Log likelihood = -83.338012                     Pseudo R2         =     0.0056
+
+------------------------------------------------------------------------------
+       az1t2 | Odds Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      covid2 |   1.474201   .6007968     0.95   0.341     .6632202    3.276845
+       _cons |        .22   .0732666    -4.55   0.000     .1145373    .4225698
+------------------------------------------------------------------------------
+Note: _cons estimates baseline odds.
+
+Logistic regression                             Number of obs     =        127
+                                                LR chi2(1)        =       0.06
+                                                Prob > chi2       =     0.8051
+Log likelihood =  -14.17058                     Pseudo R2         =     0.0021
+
+------------------------------------------------------------------------------
+       az2t1 | Odds Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      covid2 |   1.351351   1.673447     0.24   0.808     .1193114    15.30575
+       _cons |        .02    .020199    -3.87   0.000     .0027629    .1447776
+------------------------------------------------------------------------------
+Note: _cons estimates baseline odds.
+
+Logistic regression                             Number of obs     =        149
+                                                LR chi2(1)        =       0.50
+                                                Prob > chi2       =     0.4795
+Log likelihood =  -67.15115                     Pseudo R2         =     0.0037
+
+------------------------------------------------------------------------------
+       az2t2 | Odds Ratio   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+      covid2 |    .731982   .3222134    -0.71   0.478     .3088925    1.734576
+       _cons |        .24   .0771492    -4.44   0.000     .1278169    .4506447
+------------------------------------------------------------------------------
+Note: _cons estimates baseline odds.
+
+diabetes_ty |
+       pe_1 |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      9,900       99.00       99.00
+          1 |        100        1.00      100.00
+------------+-----------------------------------
+      Total |     10,000      100.00
+outcome does not vary; remember:
+                                  0 = negative outcome,
+        all other nonmissing values = positive outcome
+r(2000);
+
+end of do-file
+r(2000);
+
+end of do-file
+
+r(2000);
+
+
