@@ -70,7 +70,7 @@ summ age, detail
 gen ageg = age
 recode ageg 18/39=1 40/64=2 65/79=3 80/max=4 min/17=.
 
-local desc "ageg sex2 bmi2 carehome has_follow_up_previous_year ethnicity_16 ethnicity region2 imd chronic_cardiac_disease diabetes_type_1 diabetes_type_2 diabetes_unknown_type current_copd dmards dementia dialysis solid_organ_transplantation chemo_or_radio intel_dis_incl_downs_syndrome lung_cancer cancer_excl_lung_and_haem haematological_cancer bone_marrow_transplant cystic_fibrosis sickle_cell_disease permanant_immunosuppression temporary_immunosuppression psychosis_schiz_bipolar asplenia"
+local desc "ageg sex2 bmi2 carehome has_follow_up_previous_year ethnicity_16 ethnicity region2 imd symptomatic_people chronic_cardiac_disease diabetes_type_1 diabetes_type_2 diabetes_unknown_type current_copd dmards dementia dialysis solid_organ_transplantation chemo_or_radio intel_dis_incl_downs_syndrome lung_cancer cancer_excl_lung_and_haem haematological_cancer bone_marrow_transplant cystic_fibrosis sickle_cell_disease permanant_immunosuppression temporary_immunosuppression psychosis_schiz_bipolar asplenia"
 
 foreach var of local desc {
     tab `var'
@@ -230,21 +230,21 @@ local desc3 "carehome chronic_cardiac_disease diabetes_type_1 diabetes_type_2 di
 
 foreach var of local desc3 {
 tab `var'
-logistic pd1t1 covid2 if `var'==1
+logistic pd1t1 covid2 if `var'==1 & symptoms==1
 
-logistic pd1t2 covid2 if `var'==1
+logistic pd1t2 covid2 if `var'==1 & symptoms==1
 
-logistic pd2t1 covid2 if `var'==1
+logistic pd2t1 covid2 if `var'==1 & symptoms==1
 
-logistic pd2t2 covid2 if `var'==1
+logistic pd2t2 covid2 if `var'==1 & symptoms==1
 
-logistic az1t1 covid2 if `var'==1
+logistic az1t1 covid2 if `var'==1 & symptoms==1
 
-logistic az1t2 covid2 if `var'==1
+logistic az1t2 covid2 if `var'==1 & symptoms==1
 
-logistic az2t1 covid2 if `var'==1
+logistic az2t1 covid2 if `var'==1 & symtpoms==1
 
-logistic az2t2 covid2 if `var'==1
+logistic az2t2 covid2 if `var'==1 & symtpoms==1
 
 }
 //univariate and then mulivariate
