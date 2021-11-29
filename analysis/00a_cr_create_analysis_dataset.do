@@ -250,9 +250,9 @@ logistic az1t1 covid2 if `var'==1 & symptoms==1
 
 logistic az1t2 covid2 if `var'==1 & symptoms==1
 
-logistic az2t1 covid2 if `var'==1 & symtpoms==1
+logistic az2t1 covid2 if `var'==1 & symptoms==1
 
-logistic az2t2 covid2 if `var'==1 & symtpoms==1
+logistic az2t2 covid2 if `var'==1 & symptoms==1
 
 }
 //univariate and then mulivariate
@@ -277,7 +277,15 @@ logistic   pd1t2 covid2  if chemo_or_radio==1 & symptoms==1
 logistic   pd1t2 covid2  age sex2 if chemo_or_radio==1 & symptoms==1
 
 
+logistic   pd1t1 covid2 if permanant_immunosuppression==1 & symptoms==1
+logistic   pd1t1 covid2  age sex2 if permanant_immunosuppression==1 & symptoms==1
+logistic   pd1t2 covid2  if permanant_immunosuppression==1 & symptoms==1
+logistic   pd1t2 covid2  age sex2 if permanant_immunosuppression==1 & symptoms==1
 
+logistic   pd1t1 covid2 if temporary_immunosuppression==1 & symptoms==1
+logistic   pd1t1 covid2  age sex2 if temporary_immunosuppression==1 & symptoms==1
+logistic   pd1t2 covid2  if temporary_immunosuppression==1 & symptoms==1
+logistic   pd1t2 covid2  age sex2 if temporary_immunosuppression==1 & symptoms==1
 
 
 ///Pfizer dose 2
@@ -298,7 +306,15 @@ logistic   pd2t1 covid2  age sex2 if chemo_or_radio==1 & symptoms==1
 logistic   pd2t2 covid2  if chemo_or_radio==1 & symptoms==1
 logistic   pd2t2 covid2  age sex2 if chemo_or_radio==1 & symptoms==1
 
+logistic   pd2t1 covid2 if permanant_immunosuppression==1 & symptoms==1
+logistic   pd2t1 covid2  age sex2 if permanant_immunosuppression==1 & symptoms==1
+logistic   pd2t2 covid2  if permanant_immunosuppression==1 & symptoms==1
+logistic   pd2t2 covid2  age sex2 if permanant_immunosuppression==1 & symptoms==1
 
+logistic   pd2t1 covid2 if temporary_immunosuppression==1 & symptoms==1
+logistic   pd2t1 covid2  age sex2 if temporary_immunosuppression==1 & symptoms==1
+logistic   pd2t2 covid2  if temporary_immunosuppression==1 & symptoms==1
+logistic   pd2t2 covid2  age sex2 if temporary_immunosuppression==1 & symptoms==1
 
 
 ///Astra Zeneca dose 1
@@ -319,7 +335,15 @@ logistic   az1t1 covid2  age sex2 if chemo_or_radio==1 & symptoms==1
 logistic   az1t2 covid2  if chemo_or_radio==1 & symptoms==1
 logistic   az1t2 covid2  age sex2 if chemo_or_radio==1 & symptoms==1
 
+logistic   az1t1 covid2 if permanant_immunosuppression==1 & symptoms==1
+logistic   az1t1 covid2  age sex2 if permanant_immunosuppression==1 & symptoms==1
+logistic   az1t2 covid2  if permanant_immunosuppression==1 & symptoms==1
+logistic   az1t2 covid2  age sex2 if permanant_immunosuppression==1 & symptoms==1
 
+logistic   az1t1 covid2 if temporary_immunosuppression==1 & symptoms==1
+logistic   az1t1 covid2  age sex2 if temporary_immunosuppression==1 & symptoms==1
+logistic   az1t2 covid2  if temporary_immunosuppression==1 & symptoms==1
+logistic   az1t2 covid2  age sex2 if temporary_immunosuppression==1 & symptoms==1
 
 ///Astra Zeneca dose 2
 logistic   az2t1 covid2 if symptoms==1
@@ -339,6 +363,14 @@ logistic   az2t1 covid2  age sex2 if chemo_or_radio==1 & symptoms==1
 logistic   az2t2 covid2  if chemo_or_radio==1 & symptoms==1
 logistic   az2t2 covid2  age sex2 if chemo_or_radio==1 & symptoms==1
 
+logistic   az2t1 covid2 if permanant_immunosuppression==1 & symptoms==1
+logistic   az2t1 covid2  age sex2 if permanant_immunosuppression==1 & symptoms==1
+logistic   az2t2 covid2  if permanant_immunosuppression==1 & symptoms==1
+logistic   az2t2 covid2  age sex2 if permanant_immunosuppression==1 & symptoms==1
 
+logistic   az2t1 covid2 if temporary_immunosuppression==1 & symptoms==1
+logistic   az2t1 covid2  age sex2 if temporary_immunosuppression==1 & symptoms==1
+logistic   az2t2 covid2  if temporary_immunosuppression==1 & symptoms==1
+logistic   az2t2 covid2  age sex2 if temporary_immunosuppression==1 & symptoms==1
 
 log close
