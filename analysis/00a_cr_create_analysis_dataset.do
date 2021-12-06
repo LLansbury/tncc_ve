@@ -159,54 +159,60 @@ tab timevacazd2
 
 //to get unvaccinated people (1=unvaccinated, 0=vaccinated)
 gen novaccine=1
-recode novaccine 1=0 if timevacpfizerd1==1|timevacpfizerd2==1|timevacazd1==1|timevacazd2==1|timevacpfizerd1==2|timevacpfizerd2==2|timevacazd1==2|timevacazd2==2
-recode novaccine 0=2 if covid_vax_pfizer_1_date2>positive_test_1_date2
-recode novaccine 0=2 if covid_vax_az_1_date2 > positive_test_1_date2
+recode novaccine 1=0 if pfizerd1==1|pfizerd2==1|azd1==1|azd2==1
+recode novaccine 0=1 if covid_vax_pfizer_1_date2>positive_test_1_date2 & covid_vax_pfizer_1_date2!=.
+recode novaccine 0=1 if covid_vax_pfizer_2_date2>positive_test_1_date2 & covid_vax_pfizer_2_date2!=.
+recode novaccine 0=1 if covid_vax_pfizer_1_date2>negative_test_result_1_date2 & covid_vax_pfizer_1_date2!=.
+recode novaccine 0=1 if covid_vax_pfizer_2_date2>negative_test_result_1_date2 & covid_vax_pfizer_2_date2!=.
+recode novaccine 0=1 if covid_vax_az_1_date2>positive_test_1_date2 & covid_vax_az_1_date2!=.
+recode novaccine 0=1 if covid_vax_az_2_date2>positive_test_1_date2 & covid_vax_az_2_date2!=.
+recode novaccine 0=1 if covid_vax_az_1_date2>negative_test_result_1_date2 & covid_vax_az_1_date2!=.
+recode novaccine 0=1 if covid_vax_az_2_date2>negative_test_result_1_date2 & covid_vax_az_2_date2!=.
 
 
 gen pd1t1 = timevacpfizerd1
+recode pd1t1 .=0 if novaccine==1 & positive_test_1_date2!=.| negative_test_result_1_date2!=.
 recode pd1t1 2=.
-recode pd1t1 .=0 if novaccine==1
 tab pd1t1
 
 gen pd1t2 = timevacpfizerd1
-recode pd1t2 1=. 
-recode pd1t2 .=0 if novaccine==1
+recode pd1t2 1=.
+recode pd1t2 .=0 if novaccine==1 & positive_test_1_date2!=.| negative_test_result_1_date2!=.
 recode pd1t2 2=1
 tab pd1t2
 
 
 gen pd2t1 = timevacpfizerd2
+recode pd2t1 .=0 if novaccine==1 & positive_test_1_date2!=.| negative_test_result_1_date2!=.
 recode pd2t1 2=. 
-recode pd2t1 .=0 if novaccine==1
 tab pd2t1
 
 gen pd2t2 = timevacpfizerd2
 recode pd2t2 1=. 
-recode pd2t2 .=0 if novaccine==1
+recode pd2t2 .=0 if novaccine==1 & positive_test_1_date2!=.| negative_test_result_1_date2!=.
 recode pd2t2 2=1
 tab pd2t2
 
 gen az1t1 = timevacazd1
+recode az1t1 .=0 if novaccine==1 & positive_test_1_date2!=.| negative_test_result_1_date2!=.
 recode az1t1 2=.
-recode az1t1 .=0 if novaccine==1
 tab az1t1
 
 gen az1t2 = timevacazd1
 recode az1t2 1=. 
-recode az1t2 .=0 if novaccine==1
+recode az1t2 .=0 if novaccine==1 & positive_test_1_date2!=.| negative_test_result_1_date2!=.
 recode az1t2 2=1
 tab az1t2
 
 
 gen az2t1 = timevacazd2
+recode az2t1 .=0 if novaccine==1 & positive_test_1_date2!=.| negative_test_result_1_date2!=.
 recode az2t1 2=. 
-recode az2t1 .=0 if novaccine==1
 tab az2t1
 
 gen az2t2 = timevacazd2
 recode az2t2 1=. 
-recode az2t2 .=0 if novaccine==1
+recode az2t2 .=0 if novaccine==1 & positive_test_1_date2!=.| negative_test_result_1_date2!=.
 recode az2t2 2=1
 tab az2t2
 
