@@ -228,6 +228,150 @@ gen symptoms=0
 recode symptoms 0=1 if symptomatic_people=="Y"
 tab symptoms
 
+//To get positive and negative results for each specific time period 0=neg test, 1=pos test//
+
+/*Pfizer dose 1*/
+/*Unvaccinated 0=negative test, 1=positive test in that time period*/
+
+gen unvacpd1t1res=.
+recode unvacpd1t1res .=0 if pd1t1==0 & covid2==0 & testtime!=0 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
+recode unvacpd1t1res .=1 if pd1t1==0 & covid2==1 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
+tab unvacpd1t1res
+
+/*vaccinated 0=nega test, 1=pos test during that time period*/
+gen vacpd1t1res =.
+recode vacpd1t1res .=0 if pd1t1==1 & covid2==0 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
+recode vacpd1t1res .=1 if pd1t1==1 & covid2==1 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
+tab vacpd1t1res
+
+/*Then combine to get separated test result for vacc & unvac combined*/
+
+gen pfd1res0to20 = vacpd1t1res
+recode pfd1res0to20 .=0 if unvacpd1t1res==0 
+recode pfd1res0to20 .=1 if unvacpd1t1res==1 
+tab pfd1res0to20
+ 
+/**Pfizer dose 1 >=21 days **/
+
+gen unvacpd1t2res=.
+recode unvacpd1t2res .=0 if pd1t2==0 & covid2==0 & testtime!=0 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
+recode unvacpd1t2res .=1 if pd1t2==0 & covid2==1 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
+tab unvacpd1t2res
+
+gen vacpd1t2res =.
+recode vacpd1t2res .=0 if pd1t2==1 & covid2==0 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
+recode vacpd1t2res .=1 if pd1t2==1 & covid2==1 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
+tab vacpd1t2res
+
+gen pfd1res21plus = vacpd1t2res
+recode pfd1res21plus .=0 if unvacpd1t2res==0
+recode pfd1res21plus .=1 if unvacpd1t2res==1 
+tab pfd1res21plus
+
+/*Pfizer dose 2* 0-13 days*/
+
+gen unvacpd2t1res=.
+recode unvacpd2t1res .=0 if pd2t1==0 & covid2==0 & testtime!=0 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
+recode unvacpd2t1res .=1 if pd2t1==0 & covid2==1 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
+tab unvacpd2t1res
+
+gen vacpd2t1res =.
+recode vacpd2t1res .=0 if pd2t1==1 & covid2==0 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
+recode vacpd2t1res .=1 if pd2t1==1 & covid2==1 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
+tab vacpd2t1res
+
+gen pfd2res0to13 = vacpd2t1res
+recode pfd2res0to13 .=0 if unvacpd2t1res==0 
+recode pfd2res0to13 .=1 if unvacpd2t1res==1 
+tab pfd2res0to13
+
+/*Pfizer dose 2 14 days  plus*/
+
+gen unvacpd2t2res=.
+recode unvacpd2t2res .=0 if pd2t2==0 & covid2==0 & testtime!=0 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
+recode unvacpd2t2res .=1 if pd2t2==0 & covid2==1 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
+tab unvacpd2t2res
+
+gen vacpd2t2res =.
+recode vacpd2t2res .=0 if pd2t2==1 & covid2==0 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
+recode vacpd2t2res .=1 if pd2t2==1 & covid2==1 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
+tab vacpd2t2res
+
+gen pfd2res14plus = vacpd2t2res
+recode pfd2res14plus .=0 if unvacpd2t2res==0
+recode pfd2res14plus .=1 if unvacpd2t2res==1 
+tab pfd2res14plus
+
+
+/*AZ dose 1, day 0 to 20*/
+
+gen unvacaz1t1res=.
+recode unvacaz1t1res .=0 if az1t1==0 & covid2==0 & testtime!=0 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
+recode unvacaz1t1res .=1 if az1t1==0 & covid2==1 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
+tab unvacaz1t1res
+
+gen vacaz1t1res =.
+recode vacaz1t1res .=0 if az1t1==1 & covid2==0 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
+recode vacaz1t1res .=1 if az1t1==1 & covid2==1 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
+tab vacaz1t1res
+
+gen azd1res0to20 = vacaz1t1res
+recode azd1res0to20 .=0 if unvacaz1t1res==0 
+recode azd1res0to20 .=1 if unvacaz1t1res==1 
+tab azd1res0to20
+
+/*AZ dose 1, day 21 plus*/
+
+gen unvacaz1t2res=.
+recode unvacaz1t2res .=0 if az1t2==0 & covid2==0 & testtime!=0 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
+recode unvacaz1t2res .=1 if az1t2==0 & covid2==1 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
+tab unvacaz1t2res
+
+gen vacaz1t2res =.
+recode vacaz1t2res .=0 if az1t2==1 & covid2==0 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
+recode vacaz1t2res .=1 if az1t2==1 & covid2==1 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
+tab vacaz1t2res
+
+gen azd1res21plus = vacaz1t2res
+recode azd1res21plus .=0 if unvacaz1t2res==0
+recode azd1res21plus .=1 if unvacaz1t2res==1 
+tab azd1res21plus
+
+/**AZ dose 2, day 0 to 13**/
+
+gen unvacaz2t1res=.
+recode unvacaz2t1res .=0 if az2t1==0 & covid2==0 & testtime!=0 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
+recode unvacaz2t1res .=1 if az2t1==0 & covid2==1 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
+tab unvacaz2t1res
+
+gen vacaz2t1res =.
+recode vacaz2t1res .=0 if az2t1==1 & covid2==0 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
+recode vacaz2t1res .=1 if az2t1==1 & covid2==1 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
+tab vacaz2t1res
+
+gen azd2res0to13 = vacaz2t1res
+recode azd2res0to13 .=0 if unvacaz2t1res==0 
+recode azd2res0to13 .=1 if unvacaz2t1res==1 
+tab azd2res0to13
+
+/**AZ dose 2 14 days plus*/
+
+gen unvacaz2t2res=.
+recode unvacaz2t2res .=0 if az2t2==0 & covid2==0 & testtime!=0 & pd1t1!=1 &pd1t2!=1 & pd2t1!=1& pd2t2!=1
+recode unvacaz2t2res .=1 if az2t2==0 & covid2==1 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
+tab unvacaz2t1res
+
+gen vacaz2t2res =.
+recode vacaz2t2res .=0 if az2t2==1 & covid2==0 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1& pd2t2!=1
+recode vacaz2t2res .=1 if az2t2==1 & covid2==1 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
+tab vacaz2t2res
+
+gen azd2res14plus = vacaz2t2res
+recode azd2res14plus .=0 if unvacaz2t2res==0 
+recode azd2res14plus .=1 if unvacaz2t2res==1 
+tab azd2res14plus
+
+
 
 // vaccine % and univariate analysis //- by age group, any type, d1, d2- grousp 0-20- 21+ and D2 14+ and time period before janry 8th and after
 		
@@ -244,139 +388,142 @@ local desc3 "carehome chronic_cardiac_disease diabetes_type_1 diabetes_type_2 di
 
 foreach var of local desc3 {
 tab `var'
-logistic pd1t1 covid2 if `var'==1 & symptoms==1
+logistic pd1t1 pfd1res0to20 if `var'==1 & symptoms==1
 
-logistic pd1t2 covid2 if `var'==1 & symptoms==1
+logistic pd1t2 pfd1res21plus if `var'==1 & symptoms==1
 
-logistic pd2t1 covid2 if `var'==1 & symptoms==1
+logistic pd2t1 pfd2res0to13 if `var'==1 & symptoms==1
 
-logistic pd2t2 covid2 if `var'==1 & symptoms==1
+logistic pd2t2 pfd2res14plus if `var'==1 & symptoms==1
 
-logistic az1t1 covid2 if `var'==1 & symptoms==1
+logistic az1t1 azd1res0to20 if `var'==1 & symptoms==1
 
-logistic az1t2 covid2 if `var'==1 & symptoms==1
+logistic az1t2 azd1res21plus if `var'==1 & symptoms==1
 
-logistic az2t1 covid2 if `var'==1 & symptoms==1
+logistic az2t1 azd2res0to13 if `var'==1 & symptoms==1
 
-logistic az2t2 covid2 if `var'==1 & symptoms==1
+logistic az2t2 azd2res14plus if `var'==1 & symptoms==1ogistic pd1t1 covid2 if `var'==1 & symptoms==1
+
 
 }
 //univariate and then mulivariate
 			
-// vaccine efficacy overall unadjuste and adjusted for minimal things- in 4 age grousp 18 to 39, 41/64, 65/79 and 80+
+// vaccine efficacy overall unadjuste and adjusted for minimal things
 ///Pfizer dose 1
-logistic   pd1t1 covid2 if symptoms==1
-logistic   pd1t1 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
-logistic   pd1t2 covid2 if symptoms==1
-logistic   pd1t2 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
+
+logistic   pd1t1 pfd1res0to20 if symptoms==1
+logistic   pd1t1 pfd1res0to20  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
+logistic   pd1t2 pfd1res21plus if symptoms==1
+logistic   pd1t2 pfd1res21plus  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
 
 
-logistic   pd1t1 covid2 if solid_organ_transplantation==1 & symptoms==1
-logistic   pd1t1 covid2  age sex2 if solid_organ_transplantation==1 & symptoms==1
-logistic   pd1t2 covid2  if solid_organ_transplantation==1 & symptoms==1
-logistic   pd1t2 covid2  age sex2 if solid_organ_transplantation==1 & symptoms==1
+logistic   pd1t1 pfd1res0to20 if solid_organ_transplantation==1 & symptoms==1
+logistic   pd1t1 pfd1res0to20  age sex2 if solid_organ_transplantation==1 & symptoms==1
+logistic   pd1t2 pfd1res21plus  if solid_organ_transplantation==1 & symptoms==1
+logistic   pd1t2 pfd1res21plus  age sex2 if solid_organ_transplantation==1 & symptoms==1
 
 
-logistic   pd1t1 covid2 if chemo_or_radio==1 & symptoms==1
-logistic   pd1t1 covid2  age sex2 if chemo_or_radio==1 & symptoms==1
-logistic   pd1t2 covid2  if chemo_or_radio==1 & symptoms==1
-logistic   pd1t2 covid2  age sex2 if chemo_or_radio==1 & symptoms==1
+logistic   pd1t1 pfd1res0to20 if chemo_or_radio==1 & symptoms==1
+logistic   pd1t1 pfd1res0to20  age sex2 if chemo_or_radio==1 & symptoms==1
+logistic   pd1t2 pfd1res21plus  if chemo_or_radio==1 & symptoms==1
+logistic   pd1t2 pfd1res21plus  age sex2 if chemo_or_radio==1 & symptoms==1
 
 
-logistic   pd1t1 covid2 if permanant_immunosuppression==1 & symptoms==1
-logistic   pd1t1 covid2  age sex2 if permanant_immunosuppression==1 & symptoms==1
-logistic   pd1t2 covid2  if permanant_immunosuppression==1 & symptoms==1
-logistic   pd1t2 covid2  age sex2 if permanant_immunosuppression==1 & symptoms==1
+logistic   pd1t1 pfd1res0to20 if permanant_immunosuppression==1 & symptoms==1
+logistic   pd1t1 pfd1res0to20  age sex2 if permanant_immunosuppression==1 & symptoms==1
+logistic   pd1t2 pfd1res21plus  if permanant_immunosuppression==1 & symptoms==1
+logistic   pd1t2 pfd1res21plus  age sex2 if permanant_immunosuppression==1 & symptoms==1
 
-logistic   pd1t1 covid2 if temporary_immunosuppression==1 & symptoms==1
-logistic   pd1t1 covid2  age sex2 if temporary_immunosuppression==1 & symptoms==1
-logistic   pd1t2 covid2  if temporary_immunosuppression==1 & symptoms==1
-logistic   pd1t2 covid2  age sex2 if temporary_immunosuppression==1 & symptoms==1
+logistic   pd1t1 pfd1res0to20 if temporary_immunosuppression==1 & symptoms==1
+logistic   pd1t1 pfd1res0to20  age sex2 if temporary_immunosuppression==1 & symptoms==1
+logistic   pd1t2 pfd1res21plus  if temporary_immunosuppression==1 & symptoms==1
+logistic   pd1t2 pfd1res21plus  age sex2 if temporary_immunosuppression==1 & symptoms==1
 
 
 ///Pfizer dose 2
-logistic   pd2t1 covid2 if symptoms==1
-logistic   pd2t1 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
-logistic   pd2t2 covid2 if symptoms==1
-logistic   pd2t2 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
+logistic   pd2t1 pfd2res0to13 if symptoms==1
+logistic   pd2t1 pfd2res0to13  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
+logistic   pd2t2 pfd2res14plus if symptoms==1
+logistic   pd2t2 pfd2res14plus  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
 
 
-logistic   pd2t1 covid2 if solid_organ_transplantation==1 & symptoms==1
-logistic   pd2t1 covid2  age sex2 if solid_organ_transplantation==1 & symptoms==1
-logistic   pd2t2 covid2  if solid_organ_transplantation==1 & symptoms==1
-logistic   pd2t2 covid2  age sex2 if solid_organ_transplantation==1 & symptoms==1
+logistic   pd2t1 pfd2res0to13 if solid_organ_transplantation==1 & symptoms==1
+logistic   pd2t1 pfd2res0to13  age sex2 if solid_organ_transplantation==1 & symptoms==1
+logistic   pd2t2 pfd2res14plus  if solid_organ_transplantation==1 & symptoms==1
+logistic   pd2t2 pfd2res14plus  age sex2 if solid_organ_transplantation==1 & symptoms==1
 
 
-logistic   pd2t1 covid2 if chemo_or_radio==1 & symptoms==1
-logistic   pd2t1 covid2  age sex2 if chemo_or_radio==1 & symptoms==1
-logistic   pd2t2 covid2  if chemo_or_radio==1 & symptoms==1
-logistic   pd2t2 covid2  age sex2 if chemo_or_radio==1 & symptoms==1
+logistic   pd2t1 pfd2res0to13 if chemo_or_radio==1 & symptoms==1
+logistic   pd2t1 pfd2res0to13  age sex2 if chemo_or_radio==1 & symptoms==1
+logistic   pd2t2 pfd2res14plus  if chemo_or_radio==1 & symptoms==1
+logistic   pd2t2 pfd2res14plus  age sex2 if chemo_or_radio==1 & symptoms==1
 
-logistic   pd2t1 covid2 if permanant_immunosuppression==1 & symptoms==1
-logistic   pd2t1 covid2  age sex2 if permanant_immunosuppression==1 & symptoms==1
-logistic   pd2t2 covid2  if permanant_immunosuppression==1 & symptoms==1
-logistic   pd2t2 covid2  age sex2 if permanant_immunosuppression==1 & symptoms==1
+logistic   pd2t1 pfd2res0to13 if permanant_immunosuppression==1 & symptoms==1
+logistic   pd2t1 pfd2res0to13  age sex2 if permanant_immunosuppression==1 & symptoms==1
+logistic   pd2t2 pfd2res14plus  if permanant_immunosuppression==1 & symptoms==1
+logistic   pd2t2 pfd2res14plus  age sex2 if permanant_immunosuppression==1 & symptoms==1
 
-logistic   pd2t1 covid2 if temporary_immunosuppression==1 & symptoms==1
-logistic   pd2t1 covid2  age sex2 if temporary_immunosuppression==1 & symptoms==1
-logistic   pd2t2 covid2  if temporary_immunosuppression==1 & symptoms==1
-logistic   pd2t2 covid2  age sex2 if temporary_immunosuppression==1 & symptoms==1
+logistic   pd2t1 pfd2res0to13 if temporary_immunosuppression==1 & symptoms==1
+logistic   pd2t1 pfd2res0to13  age sex2 if temporary_immunosuppression==1 & symptoms==1
+logistic   pd2t2 pfd2res14plus  if temporary_immunosuppression==1 & symptoms==1
+logistic   pd2t2 pfd2res14plus  age sex2 if temporary_immunosuppression==1 & symptoms==1
 
 
 ///Astra Zeneca dose 1
-logistic   az1t1 covid2 if symptoms==1
-logistic   az1t1 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
-logistic   az1t2 covid2 if symptoms==1
-logistic   az1t2 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
+logistic   az1t1 azd1res0to20 if symptoms==1
+logistic   az1t1 timeazd1res0to20  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
+logistic   az1t2 azd1res21plus if symptoms==1
+logistic   az1t2 azd1res21plus  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
 
 
-logistic   az1t1 covid2 if solid_organ_transplantation==1 & symptoms==1
-logistic   az1t1 covid2  age sex2 if solid_organ_transplantation==1 & symptoms==1
-logistic   az1t2 covid2  if solid_organ_transplantation==1 & symptoms==1
-logistic   az1t2 covid2  age sex2 if solid_organ_transplantation==1 & symptoms==1
+logistic   az1t1 azd1res0to20 if solid_organ_transplantation==1 & symptoms==1
+logistic   az1t1 azd1res0to20  age sex2 if solid_organ_transplantation==1 & symptoms==1
+logistic   az1t2 azd1res21plus  if solid_organ_transplantation==1 & symptoms==1
+logistic   az1t2 azd1res21plus  age sex2 if solid_organ_transplantation==1 & symptoms==1
 
 
-logistic   az1t1 covid2 if chemo_or_radio==1 & symptoms==1
-logistic   az1t1 covid2  age sex2 if chemo_or_radio==1 & symptoms==1
-logistic   az1t2 covid2  if chemo_or_radio==1 & symptoms==1
-logistic   az1t2 covid2  age sex2 if chemo_or_radio==1 & symptoms==1
+logistic   az1t1 azd1res0to20 if chemo_or_radio==1 & symptoms==1
+logistic   az1t1 azd1res0to20  age sex2 if chemo_or_radio==1 & symptoms==1
+logistic   az1t2 azd1res21plus  if chemo_or_radio==1 & symptoms==1
+logistic   az1t2 azd1res21plus  age sex2 if chemo_or_radio==1 & symptoms==1
 
-logistic   az1t1 covid2 if permanant_immunosuppression==1 & symptoms==1
-logistic   az1t1 covid2  age sex2 if permanant_immunosuppression==1 & symptoms==1
-logistic   az1t2 covid2  if permanant_immunosuppression==1 & symptoms==1
-logistic   az1t2 covid2  age sex2 if permanant_immunosuppression==1 & symptoms==1
+logistic   az1t1 azd1res0to20 if permanant_immunosuppression==1 & symptoms==1
+logistic   az1t1 azd1res0to20  age sex2 if permanant_immunosuppression==1 & symptoms==1
+logistic   az1t2 azd1res21plus  if permanant_immunosuppression==1 & symptoms==1
+logistic   az1t2 azd1res21plus  age sex2 if permanant_immunosuppression==1 & symptoms==1
 
-logistic   az1t1 covid2 if temporary_immunosuppression==1 & symptoms==1
-logistic   az1t1 covid2  age sex2 if temporary_immunosuppression==1 & symptoms==1
-logistic   az1t2 covid2  if temporary_immunosuppression==1 & symptoms==1
-logistic   az1t2 covid2  age sex2 if temporary_immunosuppression==1 & symptoms==1
+logistic   az1t1 azd1res0to20 if temporary_immunosuppression==1 & symptoms==1
+logistic   az1t1 azd1res0to20  age sex2 if temporary_immunosuppression==1 & symptoms==1
+logistic   az1t2 azd1res21plus  if temporary_immunosuppression==1 & symptoms==1
+logistic   az1t2 azd1res21plus  age sex2 if temporary_immunosuppression==1 & symptoms==1
 
 ///Astra Zeneca dose 2
-logistic   az2t1 covid2 if symptoms==1
-logistic   az2t1 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
-logistic   az2t2 covid2 if symptoms==1
-logistic   az2t2 covid2  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
+logistic   az2t1 azd2res0to13 if symptoms==1
+logistic   az2t1 azd2res0to13  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
+logistic   az2t2 azd2res14plus if symptoms==1
+logistic   az2t2 azd2res14plus  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
 
 
-logistic   az2t1 covid2 if solid_organ_transplantation==1 & symptoms==1
-logistic   az2t1 covid2  age sex2 if solid_organ_transplantation==1 & symptoms==1
-logistic   az2t2 covid2  if solid_organ_transplantation==1 & symptoms==1
-logistic   az2t2 covid2  age sex2 if solid_organ_transplantation==1 & symptoms==1
+logistic   az2t1 azd2res0to13 if solid_organ_transplantation==1 & symptoms==1
+logistic   az2t1 azd2res0to13  age sex2 if solid_organ_transplantation==1 & symptoms==1
+logistic   az2t2 azd2res14plus  if solid_organ_transplantation==1 & symptoms==1
+logistic   az2t2 azd2res14plus  age sex2 if solid_organ_transplantation==1 & symptoms==1
 
 
-logistic   az2t1 covid2 if chemo_or_radio==1 & symptoms==1
-logistic   az2t1 covid2  age sex2 if chemo_or_radio==1 & symptoms==1
-logistic   az2t2 covid2  if chemo_or_radio==1 & symptoms==1
-logistic   az2t2 covid2  age sex2 if chemo_or_radio==1 & symptoms==1
+logistic   az2t1 azd2res0to13 if chemo_or_radio==1 & symptoms==1
+logistic   az2t1 azd2res0to13  age sex2 if chemo_or_radio==1 & symptoms==1
+logistic   az2t2 azd2res14plus  if chemo_or_radio==1 & symptoms==1
+logistic   az2t2 azd2res14plus  age sex2 if chemo_or_radio==1 & symptoms==1
 
-logistic   az2t1 covid2 if permanant_immunosuppression==1 & symptoms==1
-logistic   az2t1 covid2  age sex2 if permanant_immunosuppression==1 & symptoms==1
-logistic   az2t2 covid2  if permanant_immunosuppression==1 & symptoms==1
-logistic   az2t2 covid2  age sex2 if permanant_immunosuppression==1 & symptoms==1
+logistic   az2t1 azd2res0to13 if permanant_immunosuppression==1 & symptoms==1
+logistic   az2t1 azd2res0to13  age sex2 if permanant_immunosuppression==1 & symptoms==1
+logistic   az2t2 azd2res14plus  if permanant_immunosuppression==1 & symptoms==1
+logistic   az2t2 azd2res14plus  age sex2 if permanant_immunosuppression==1 & symptoms==1
 
-logistic   az2t1 covid2 if temporary_immunosuppression==1 & symptoms==1
-logistic   az2t1 covid2  age sex2 if temporary_immunosuppression==1 & symptoms==1
-logistic   az2t2 covid2  if temporary_immunosuppression==1 & symptoms==1
-logistic   az2t2 covid2  age sex2 if temporary_immunosuppression==1 & symptoms==1
+logistic   az2t1 azd2res0to13 if temporary_immunosuppression==1 & symptoms==1
+logistic   az2t1 azd1res0to20  age sex2 if temporary_immunosuppression==1 & symptoms==1
+logistic   az2t2 azd2res14plus  if temporary_immunosuppression==1 & symptoms==1
+logistic   az2t2 azd2res14plus  age sex2 if temporary_immunosuppression==1 & symptoms==1
+
 
 log close
