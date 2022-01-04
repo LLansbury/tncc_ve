@@ -359,7 +359,7 @@ tab azd2res0to13
 gen unvacaz2t2res=.
 recode unvacaz2t2res .=0 if az2t2==0 & covid2==0 & testtime!=0 & pd1t1!=1 &pd1t2!=1 & pd2t1!=1& pd2t2!=1
 recode unvacaz2t2res .=1 if az2t2==0 & covid2==1 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
-tab unvacaz2t1res
+tab unvacaz2t2res
 
 gen vacaz2t2res =.
 recode vacaz2t2res .=0 if az2t2==1 & covid2==0 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1& pd2t2!=1
@@ -402,7 +402,7 @@ logistic az1t2 azd1res21plus if `var'==1 & symptoms==1
 
 logistic az2t1 azd2res0to13 if `var'==1 & symptoms==1
 
-logistic az2t2 azd2res14plus if `var'==1 & symptoms==1ogistic pd1t1 covid2 if `var'==1 & symptoms==1
+logistic az2t2 azd2res14plus if `var'==1 & symptoms==1
 
 
 }
@@ -471,7 +471,7 @@ logistic   pd2t2 pfd2res14plus  age sex2 if temporary_immunosuppression==1 & sym
 
 ///Astra Zeneca dose 1
 logistic   az1t1 azd1res0to20 if symptoms==1
-logistic   az1t1 timeazd1res0to20  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
+logistic   az1t1 azd1res0to20  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
 logistic   az1t2 azd1res21plus if symptoms==1
 logistic   az1t2 azd1res21plus  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
 
