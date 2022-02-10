@@ -33,8 +33,8 @@
     "opensafely-chemotherapy-or-radiotherapy.csv": {
       "id": "opensafely/chemotherapy-or-radiotherapy/2020-04-15",
       "url": "https://codelists.opensafely.org/codelist/opensafely/chemotherapy-or-radiotherapy/2020-04-15/",
-      "downloaded_at": "2021-01-18 11:45:39.601151Z",
-      "sha": "cd33b4059bb1f9afcf4d04ff46bf72f088548750"
+      "downloaded_at": "2022-02-10 14:00:12.100985Z",
+      "sha": "41cd7183aee6e1932c4f9b09e8e93f3c7741d4e3"
     },
     "opensafely-covid-identification.csv": {
       "id": "opensafely/covid-identification/2020-06-03",
@@ -87,8 +87,8 @@
     "opensafely-dialysis.csv": {
       "id": "opensafely/dialysis/2020-07-16",
       "url": "https://codelists.opensafely.org/codelist/opensafely/dialysis/2020-07-16/",
-      "downloaded_at": "2021-01-18 11:45:41.870503Z",
-      "sha": "9ef20ad32280d276774f5b99b12c6a46513fc478"
+      "downloaded_at": "2022-02-10 14:00:14.319993Z",
+      "sha": "3404a792805335e5501bdff03bb900c06fed248b"
     },
     "opensafely-ethnicity.csv": {
       "id": "opensafely/ethnicity/2020-04-27",
