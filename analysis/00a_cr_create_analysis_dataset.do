@@ -45,23 +45,29 @@ foreach var of local string {
 gen carehome = care_home_type2
 recode carehome 1/3=1 .=0
 
-//Covid diagnosis
-gen covid = positive_test_1_date2
-recode covid min/max=1
-tab covid
+///***DEFINE COVID DIAGNOSIS, 1 = positive Covid test, 0 = negative Covid test)***///
+//** Generate a variable for positive test and negative tests (excluding neg tests that are within 3 weeks of a positive test) **//
 
-gen nocovid = negative_test_result_1_date2
-recode nocovid min/max=1
-tab nocovid
+/*generate a code for negative tests that are within 3 weeks of a positive test*/
 
-//exclude if neg result within 3 weeks of positive_test_1_date
-gen testtime = positive_test_1_date2-negative_test_result_1_date2
+
+gen pos=positive_test_1_date2
+recode pos min/max=1
+tab pos
+
+gen neg= negative_test_result_1_date2
+recode neg min/max=1
+tab neg
+
+gen testtime=pos-neg
 recode testtime -21/20=0
-recode nocovid 1=. if testtime==0
+recode neg 1=. if testtime==0
+tab testtime
 
-gen covid2= covid
-recode covid2 .=0 if nocovid==1
+///***GENERATE A VARIABLE FOR IMMUNOCOMPROMISED PEOPLE***///
 
+gen immcomp=0
+recode immcomp 0=1 if haematological_cancer==1|bone_marrow_transplant==1|permanant_immunosuppression==1|temporary_immunosuppression==1|solid_organ_transplant==1|chemo_or_radio==1
 
 
 //early summary of data
@@ -70,460 +76,515 @@ summ age, detail
 gen ageg = age
 recode ageg 18/39=1 40/64=2 65/79=3 80/max=4 min/17=.
 
-local desc "ageg sex2 bmi2 carehome has_follow_up_previous_year ethnicity_16 ethnicity region2 imd symptomatic_people chronic_cardiac_disease diabetes_type_1 diabetes_type_2 diabetes_unknown_type current_copd dmards dementia dialysis solid_organ_transplantation chemo_or_radio intel_dis_incl_downs_syndrome lung_cancer cancer_excl_lung_and_haem haematological_cancer bone_marrow_transplant cystic_fibrosis sickle_cell_disease permanant_immunosuppression temporary_immunosuppression psychosis_schiz_bipolar asplenia"
+local desc "ageg sex2 bmi2 carehome has_follow_up_previous_year ethnicity_16 ethnicity region2 imd symptomatic_people chronic_cardiac_disease diabetes_type_1 diabetes_type_2 diabetes_unknown_type current_copd dmards dementia dialysis solid_organ_transplantation chemo_or_radio intel_dis_incl_downs_syndrome lung_cancer cancer_excl_lung_and_haem haematological_cancer bone_marrow_transplant cystic_fibrosis sickle_cell_disease permanant_immunosuppression temporary_immunosuppression psychosis_schiz_bipolar asplenia immcomp"
 
 foreach var of local desc {
     tab `var'
 }
 
-//Pfizer vaccine doses 1 and 2
-gen pfizerd1 = covid_vax_pfizer_1_date2
-recode pfizerd1 min/max=1
-
-gen pfizerd2 = covid_vax_pfizer_2_date2
-recode pfizerd2 min/max=1
-
-
-//time between pfizer vaccine dose 1 and either a positive or negative test
-gen timevacpfd1neg = negative_test_result_1_date2-covid_vax_pfizer_1_date2
-recode timevacpfd1neg 0/20=1 21/max=2
-recode timevacpfd1neg min/-1=.
-tab timevacpfd1neg
-
-gen timevacpfd1pos = positive_test_1_date2-covid_vax_pfizer_1_date2
-recode timevacpfd1pos 0/20=1 21/max=2
-recode timevacpfd1pos min/-1=.
-tab timevacpfd1pos
-
-gen timevacpfizerd1=timevacpfd1pos
-recode timevacpfizerd1 .=1 if timevacpfd1neg==1
-recode timevacpfizerd1 .=2 if timevacpfd1neg==2
-tab timevacpfizerd1
-
-//time between pfizer vaccine dose 2 and either a positive or negative test
-gen timevacpfd2neg = negative_test_result_1_date2-covid_vax_pfizer_2_date2
-recode timevacpfd2neg 0/13=1 14/max=2
-recode timevacpfd2neg min/-1=.
-tab timevacpfd2neg
-
-gen timevacpfd2pos = positive_test_1_date2-covid_vax_pfizer_2_date2
-recode timevacpfd2pos 0/13=1 14/max=2
-recode timevacpfd2pos min/-1=.
-tab timevacpfd2pos
-
-gen timevacpfizerd2=timevacpfd2pos
-recode timevacpfizerd2 .=1 if timevacpfd2neg==1
-recode timevacpfizerd2 .=2 if timevacpfd2neg==2
-tab timevacpfizerd2
-
-//** AZ VACCINE doses 1 and 2 (LL added)
-
-gen azd1 = covid_vax_az_1_date2
-recode azd1 min/max=1
-
-gen azd2 = covid_vax_az_2_date2
-recode azd2 min/max=1
-
-//time between AZ vaccine dose 1 and either a positive or negative test
-gen timevacazd1neg = negative_test_result_1_date2-covid_vax_az_1_date2
-recode timevacazd1neg 0/20=1 21/max=2
-recode timevacazd1neg min/-1=.
-tab timevacazd1neg
-
-gen timevacazd1pos = positive_test_1_date2-covid_vax_az_1_date2
-recode timevacazd1pos 0/20=1 21/max=2
-recode timevacazd1pos min/-1=.
-tab timevacazd1pos
-
-gen timevacazd1=timevacazd1pos
-recode timevacazd1 .=1 if timevacazd1neg==1
-recode timevacazd1 .=2 if timevacazd1neg==2
-tab timevacazd1
-
-//time between AZ vaccine dose 2 and either a positive or negative test
-gen timevacazd2neg = negative_test_result_1_date2-covid_vax_az_2_date2
-recode timevacazd2neg 0/13=1 14/max=2
-recode timevacazd2neg min/-1=.
-tab timevacazd2neg
-
-gen timevacazd2pos = positive_test_1_date2-covid_vax_az_2_date2
-recode timevacazd2pos 0/13=1 14/max=2
-recode timevacazd2pos min/-1=.
-tab timevacazd2pos
-
-gen timevacazd2=timevacazd2pos
-recode timevacazd2 .=1 if timevacazd2neg==1
-recode timevacazd2 .=2 if timevacazd2neg==2
-tab timevacazd2
-
-
-//to get unvaccinated people (1=unvaccinated, 0=vaccinated)
-gen novaccine=1
-recode novaccine 1=0 if pfizerd1==1|pfizerd2==1|azd1==1|azd2==1
-recode novaccine 0=1 if covid_vax_pfizer_1_date2>positive_test_1_date2 & covid_vax_pfizer_1_date2!=.
-recode novaccine 0=1 if covid_vax_pfizer_2_date2>positive_test_1_date2 & covid_vax_pfizer_2_date2!=.
-recode novaccine 0=1 if covid_vax_pfizer_1_date2>negative_test_result_1_date2 & covid_vax_pfizer_1_date2!=.
-recode novaccine 0=1 if covid_vax_pfizer_2_date2>negative_test_result_1_date2 & covid_vax_pfizer_2_date2!=.
-recode novaccine 0=1 if covid_vax_az_1_date2>positive_test_1_date2 & covid_vax_az_1_date2!=.
-recode novaccine 0=1 if covid_vax_az_2_date2>positive_test_1_date2 & covid_vax_az_2_date2!=.
-recode novaccine 0=1 if covid_vax_az_1_date2>negative_test_result_1_date2 & covid_vax_az_1_date2!=.
-recode novaccine 0=1 if covid_vax_az_2_date2>negative_test_result_1_date2 & covid_vax_az_2_date2!=.
-
-
-gen pd1t1 = timevacpfizerd1
-recode pd1t1 .=0 if novaccine==1 & positive_test_1_date2!=.| negative_test_result_1_date2!=.
-recode pd1t1 2=.
-tab pd1t1
-
-gen pd1t2 = timevacpfizerd1
-recode pd1t2 1=.
-recode pd1t2 .=0 if novaccine==1 & positive_test_1_date2!=.| negative_test_result_1_date2!=.
-recode pd1t2 2=1
-tab pd1t2
-
-
-gen pd2t1 = timevacpfizerd2
-recode pd2t1 .=0 if novaccine==1 & positive_test_1_date2!=.| negative_test_result_1_date2!=.
-recode pd2t1 2=. 
-tab pd2t1
-
-gen pd2t2 = timevacpfizerd2
-recode pd2t2 1=. 
-recode pd2t2 .=0 if novaccine==1 & positive_test_1_date2!=.| negative_test_result_1_date2!=.
-recode pd2t2 2=1
-tab pd2t2
-
-gen az1t1 = timevacazd1
-recode az1t1 .=0 if novaccine==1 & positive_test_1_date2!=.| negative_test_result_1_date2!=.
-recode az1t1 2=.
-tab az1t1
-
-gen az1t2 = timevacazd1
-recode az1t2 1=. 
-recode az1t2 .=0 if novaccine==1 & positive_test_1_date2!=.| negative_test_result_1_date2!=.
-recode az1t2 2=1
-tab az1t2
-
-
-gen az2t1 = timevacazd2
-recode az2t1 .=0 if novaccine==1 & positive_test_1_date2!=.| negative_test_result_1_date2!=.
-recode az2t1 2=. 
-tab az2t1
-
-gen az2t2 = timevacazd2
-recode az2t2 1=. 
-recode az2t2 .=0 if novaccine==1 & positive_test_1_date2!=.| negative_test_result_1_date2!=.
-recode az2t2 2=1
-tab az2t2
-
-//Cut off time periods for dose 1 analyses for people receiving second dose//
-
-recode pd1t1 1=. if pd2t1==1|pd2t2==1
-recode pd1t2 1=. if pd2t1==1|pd2t2==1
-
-recode az1t1 1=. if az2t1==1|az2t2==1
-recode az1t2 1=. if az2t1==1|az2t2==1
-
-gen symptoms=0
-recode symptoms 0=1 if symptomatic_people=="Y"
-tab symptoms
-
-//To get positive and negative results for each specific time period 0=neg test, 1=pos test//
-
-/*Pfizer dose 1*/
-/*Unvaccinated 0=negative test, 1=positive test in that time period*/
-
-gen unvacpd1t1res=.
-recode unvacpd1t1res .=0 if pd1t1==0 & covid2==0 & testtime!=0 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
-recode unvacpd1t1res .=1 if pd1t1==0 & covid2==1 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
-tab unvacpd1t1res
-
-/*vaccinated 0=nega test, 1=pos test during that time period*/
-gen vacpd1t1res =.
-recode vacpd1t1res .=0 if pd1t1==1 & covid2==0 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
-recode vacpd1t1res .=1 if pd1t1==1 & covid2==1 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
-tab vacpd1t1res
-
-/*Then combine to get separated test result for vacc & unvac combined*/
-
-gen pfd1res0to20 = vacpd1t1res
-recode pfd1res0to20 .=0 if unvacpd1t1res==0 
-recode pfd1res0to20 .=1 if unvacpd1t1res==1 
-tab pfd1res0to20
- 
-/**Pfizer dose 1 >=21 days **/
-
-gen unvacpd1t2res=.
-recode unvacpd1t2res .=0 if pd1t2==0 & covid2==0 & testtime!=0 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
-recode unvacpd1t2res .=1 if pd1t2==0 & covid2==1 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
-tab unvacpd1t2res
-
-gen vacpd1t2res =.
-recode vacpd1t2res .=0 if pd1t2==1 & covid2==0 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
-recode vacpd1t2res .=1 if pd1t2==1 & covid2==1 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
-tab vacpd1t2res
-
-gen pfd1res21plus = vacpd1t2res
-recode pfd1res21plus .=0 if unvacpd1t2res==0
-recode pfd1res21plus .=1 if unvacpd1t2res==1 
-tab pfd1res21plus
-
-/*Pfizer dose 2* 0-13 days*/
-
-gen unvacpd2t1res=.
-recode unvacpd2t1res .=0 if pd2t1==0 & covid2==0 & testtime!=0 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
-recode unvacpd2t1res .=1 if pd2t1==0 & covid2==1 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
-tab unvacpd2t1res
-
-gen vacpd2t1res =.
-recode vacpd2t1res .=0 if pd2t1==1 & covid2==0 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
-recode vacpd2t1res .=1 if pd2t1==1 & covid2==1 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
-tab vacpd2t1res
-
-gen pfd2res0to13 = vacpd2t1res
-recode pfd2res0to13 .=0 if unvacpd2t1res==0 
-recode pfd2res0to13 .=1 if unvacpd2t1res==1 
-tab pfd2res0to13
-
-/*Pfizer dose 2 14 days  plus*/
-
-gen unvacpd2t2res=.
-recode unvacpd2t2res .=0 if pd2t2==0 & covid2==0 & testtime!=0 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
-recode unvacpd2t2res .=1 if pd2t2==0 & covid2==1 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
-tab unvacpd2t2res
-
-gen vacpd2t2res =.
-recode vacpd2t2res .=0 if pd2t2==1 & covid2==0 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
-recode vacpd2t2res .=1 if pd2t2==1 & covid2==1 & az1t1!=1 & az1t2!=1 & az2t1!=1 & az2t2!=1
-tab vacpd2t2res
-
-gen pfd2res14plus = vacpd2t2res
-recode pfd2res14plus .=0 if unvacpd2t2res==0
-recode pfd2res14plus .=1 if unvacpd2t2res==1 
-tab pfd2res14plus
-
-
-/*AZ dose 1, day 0 to 20*/
-
-gen unvacaz1t1res=.
-recode unvacaz1t1res .=0 if az1t1==0 & covid2==0 & testtime!=0 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
-recode unvacaz1t1res .=1 if az1t1==0 & covid2==1 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
-tab unvacaz1t1res
-
-gen vacaz1t1res =.
-recode vacaz1t1res .=0 if az1t1==1 & covid2==0 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
-recode vacaz1t1res .=1 if az1t1==1 & covid2==1 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
-tab vacaz1t1res
-
-gen azd1res0to20 = vacaz1t1res
-recode azd1res0to20 .=0 if unvacaz1t1res==0 
-recode azd1res0to20 .=1 if unvacaz1t1res==1 
-tab azd1res0to20
-
-/*AZ dose 1, day 21 plus*/
-
-gen unvacaz1t2res=.
-recode unvacaz1t2res .=0 if az1t2==0 & covid2==0 & testtime!=0 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
-recode unvacaz1t2res .=1 if az1t2==0 & covid2==1 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
-tab unvacaz1t2res
-
-gen vacaz1t2res =.
-recode vacaz1t2res .=0 if az1t2==1 & covid2==0 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
-recode vacaz1t2res .=1 if az1t2==1 & covid2==1 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
-tab vacaz1t2res
-
-gen azd1res21plus = vacaz1t2res
-recode azd1res21plus .=0 if unvacaz1t2res==0
-recode azd1res21plus .=1 if unvacaz1t2res==1 
-tab azd1res21plus
-
-/**AZ dose 2, day 0 to 13**/
-
-gen unvacaz2t1res=.
-recode unvacaz2t1res .=0 if az2t1==0 & covid2==0 & testtime!=0 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
-recode unvacaz2t1res .=1 if az2t1==0 & covid2==1 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
-tab unvacaz2t1res
-
-gen vacaz2t1res =.
-recode vacaz2t1res .=0 if az2t1==1 & covid2==0 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
-recode vacaz2t1res .=1 if az2t1==1 & covid2==1 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
-tab vacaz2t1res
-
-gen azd2res0to13 = vacaz2t1res
-recode azd2res0to13 .=0 if unvacaz2t1res==0 
-recode azd2res0to13 .=1 if unvacaz2t1res==1 
-tab azd2res0to13
-
-/**AZ dose 2 14 days plus*/
-
-gen unvacaz2t2res=.
-recode unvacaz2t2res .=0 if az2t2==0 & covid2==0 & testtime!=0 & pd1t1!=1 &pd1t2!=1 & pd2t1!=1& pd2t2!=1
-recode unvacaz2t2res .=1 if az2t2==0 & covid2==1 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
-tab unvacaz2t2res
-
-gen vacaz2t2res =.
-recode vacaz2t2res .=0 if az2t2==1 & covid2==0 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1& pd2t2!=1
-recode vacaz2t2res .=1 if az2t2==1 & covid2==1 & pd1t1!=1 & pd1t2!=1 & pd2t1!=1 & pd2t2!=1
-tab vacaz2t2res
-
-gen azd2res14plus = vacaz2t2res
-recode azd2res14plus .=0 if unvacaz2t2res==0 
-recode azd2res14plus .=1 if unvacaz2t2res==1 
-tab azd2res14plus
+//**Generate variable for people with symptoms, 0 no symtpoms, 1 symptoms**//
 
+gen syx = 0
+recode syx 0=1 if symptomatic_people=="Y"
+tab syx
+
+//** DEFINE POS TEST WITH SYMPTOMS**//
+gen pos_syx = pos
+recode pos_syx 1=. if syx==0
+tab pos_syx
+
+//**DEFINE NEG test with symptoms**//
+
+gen neg_syx = neg
+recode neg_syx 1=. if syx==0
+tab neg_syx
+
+//**GENERATE A VARIABLE FOR SYMPTOMATIC PEOPLE WHO HAVE A TEST RESULT (either positive or neg) 1= positive test with syx, 0== neg test with symptoms**//
+
+gen tested_syx = pos_syx
+recode tested_syx .=0 if neg_syx==1
+
+//**GENERATE A VARIABLE FOR PEOPLE VACCINATED WITH PFIZER DOSE 1 PRIOR TO THE TEST DATE**//
+
+/* Positive test after dose 1 but before dose 2*/
+
+gen pf1prepositivetest = positive_test_1_date2 - covid_vax_pfizer_1_date2
+recode pf1prepositivetest min/-1=.  /*to exclude -ve numbers ie testesd before pfizer dose 1) */
+
+
+recode pf1prepositivetest 0/max=1
+recode pf1prepositivetest 1=. if covid_vax_pfizer_2_date2<positive_test_1_date2 /*(so that people are not included if they first test pos after SECOND dose) */
+
+recode pf1prepositivetest 1=. if pos_syx!=1 /* (to exclude people who had a positive test but did not have symptoms) */
+
+tab pf1prepositivetest
+
+//**Get the 2 different time periods for dose 1**//
+/*Pd1 received before a positive test 0 to 20 days after vaccine, and >21 days after dose 1*/
+
+gen timepos_pd1=positive_test_1_date2 - covid_vax_pfizer_1_date2
+recode timepos_pd1 min/-1=.
+recode timepos_pd1 0/20=1
+recode timepos_pd1 21/max=2
+
+gen pd1_pos_0to20=pf1prepositivetest
+recode pd1_pos_0to20 1=. if timepos_pd1==2
+
+gen pd1_pos_21plus=pf1prepositivetest
+recode pd1_pos_21plus 1=. if timepos_pd1==1
+tab pd1_pos_21plus
+
+
+
+
+/* Negative test after dose 1 but before dose 2*/  
+
+gen pf1prenegtest = negative_test_result_1_date2 - covid_vax_pfizer_1_date2
+recode pf1prenegtest min/-1=. /* to exclude those with a negative test prior to first pfzer dose*/
+
+recode pf1prenegtest 0/max=1
+recode pf1prenegtest 1=. if covid_vax_pfizer_2_date2<negative_test_result_1_date2
+
+recode pf1prenegtest 1=. if neg_syx!=1 /*to exclude people who had a negative test but did not have symptoms*/
+
+tab pf1prenegtest
+
+
+/* Pd1 received before a NEG test: 0 to 20 days after vaccine and >21 days after dose 1
+*/
+
+gen timeneg_pd1=negative_test_result_1_date2 - covid_vax_pfizer_1_date2
+recode timeneg_pd1 min/-1=.
+recode timeneg_pd1 0/20=1
+recode timeneg_pd1 21/max=2
+
+gen pd1_neg_0to20=pf1prenegtest
+recode pd1_neg_0to20 1=. if timeneg_pd1==2
+tab pd1_neg_0to20
+
+gen pd1_neg_21plus=pf1prenegtest
+recode pd1_neg_21plus 1=. if timeneg_pd1==1
+tab pd1_neg_21plus 
+
+/*COMBINE 0-20 DAY POST PFIZER DOSE 1 pos and neg RESULTS for those vaccinated within 20 days of being tested (t1) */
+gen pd1t1_vax=pd1_pos_0to20
+recode pd1t1_vax .=1 if pd1_neg_0to20==1
+
+tab pd1t1_vax 
+
+/*COMBINE 21 plus day post pfizer dose 1 pos and neg results for those vaccinated more than 21 days before (t2) */
+
+gen pd1t2_vax=pd1_pos_21plus
+recode pd1t2_vax .=1 if pd1_neg_21plus==1
+tab pd1t2_vax
+
+//**GENERATE A VARIABLE FOR PEOPLE VACCINATED WITH PFIZER DOSE 2 PRIOR TO THE TEST DATE**//
+
+/* Positive test after dose 2 but before dose 3 of ANY Covid vaccine*/
+
+gen pf2prepositivetest = positive_test_1_date2 - covid_vax_pfizer_2_date2
+recode pf2prepositivetest min/-1=.  /*to exclude -ve numbers ie tested before pfizer dose 2) */
+
+
+recode pf2prepositivetest 0/max=1
+recode pf2prepositivetest 1=. if covid_vax_3_date2<positive_test_1_date2 /*(so that people are not included if they first test pos after THIRD dose of ANY vaccine) */
+
+recode pf2prepositivetest 1=. if pos_syx!=1 /* (to exclude people who had a positive test but did not have symptoms) */
+
+tab pf2prepositivetest
+
+//**Get the 2 different time periods for dose 2**//
+/* Pd2 received before a  positive test: 0 to 13 days after vaccine, and >14 days after dose 2 */
+
+gen timepos_pd2=positive_test_1_date2 - covid_vax_pfizer_2_date2
+recode timepos_pd2 min/-1=.
+recode timepos_pd2 0/13=1
+recode timepos_pd2 14/max=2
+
+gen pd2_pos_0to13=pf2prepositivetest
+recode pd2_pos_0to13 1=. if timepos_pd2==2
+
+gen pd2_pos_14plus=pf2prepositivetest
+recode pd2_pos_14plus 1=. if timepos_pd2==1
+tab pd2_pos_14plus
+
+/* Negative test after dose 2 but before dose 3 of any vaccine*/  
+
+gen pf2prenegtest = negative_test_result_1_date2 - covid_vax_pfizer_2_date2
+recode pf2prenegtest min/-1=. /* to exclude those with a negative test prior to second pfzer dose*/
+
+recode pf2prenegtest 0/max=1
+recode pf2prenegtest 1=. if covid_vax_3_date2<negative_test_result_1_date2
+
+recode pf2prenegtest 1=. if neg_syx!=1 /*to exclude people who had a negative test but did not have symptoms*/
+
+tab pf2prenegtest
+
+
+/*Pd2 received before a NEGATIVE test: 0 to 13 days after vaccine, and 14 days after dose 1**/
+
+
+gen timeneg_pd2=negative_test_result_1_date2 - covid_vax_pfizer_2_date2
+recode timeneg_pd2 min/-1=.
+recode timeneg_pd2 0/13=1
+recode timeneg_pd2 14/max=2
+
+gen pd2_neg_0to13=pf2prenegtest
+recode pd2_neg_0to13 1=. if timeneg_pd2==2
+tab pd2_neg_0to13
+
+gen pd2_neg_14plus=pf2prenegtest
+recode pd2_neg_14plus 1=. if timeneg_pd2==1
+tab pd2_neg_14plus 
+
+/*COMBINE 0-13 DAY POST PFIZER DOSE 2 pos and neg RESULTS for those vaccinated within 13 days of being tested (t1) */
+gen pd2t1_vax=pd2_pos_0to13
+recode pd2t1_vax .=1 if pd2_neg_0to13==1
+
+tab pd2t1_vax 
+
+/*COMBINE 14 plus day post pfizer dose 2 pos and neg results for those vaccinated more than 14 days before (t2) */
+
+gen pd2t2_vax=pd2_pos_14plus
+recode pd2t2_vax .=1 if pd2_neg_14plus==1
+tab pd2t2_vax
+
+
+////****ASTRA-ZENECA****////
+
+//**GENERATE A VARIABLE FOR PEOPLE VACCINATED WITH AZ DOSE 1 PRIOR TO THE TEST DATE**//
+
+/* Positive test after dose 1 but not after dose 2*/
+
+gen az1prepositivetest = positive_test_1_date2 - covid_vax_az_1_date2
+recode az1prepositivetest min/-1=.  /*to exclude -ve numbers ie testesd before AZ dose 1) */
+
+
+recode az1prepositivetest 0/max=1
+recode az1prepositivetest 1=. if covid_vax_az_2_date2<positive_test_1_date2 /*(so that people are not included if they first test pos after SECOND dose) */
+
+recode az1prepositivetest 1=. if pos_syx!=1 /* (to exclude people who had a positive test but did not have symptoms) */
+
+tab az1prepositivetest
+
+//**Get the 2 different time periods for dose 1**//
+/*AZ1 received before positive test 0 to 20 days after vaccine, and >21 days after dose 1*/
+
+gen timepos_az1=positive_test_1_date2 - covid_vax_az_1_date2
+recode timepos_az1 min/-1=.
+recode timepos_az1 0/20=1
+recode timepos_az1 21/max=2
+
+gen az1_pos_0to20=az1prepositivetest
+recode az1_pos_0to20 1=. if timepos_az1==2
+
+gen az1_pos_21plus=az1prepositivetest
+recode az1_pos_21plus 1=. if timepos_az1==1
+tab az1_pos_21plus
+
+
+/* Negative test after dose 1 but before dose 2*/  
+
+gen az1prenegtest = negative_test_result_1_date2 - covid_vax_az_1_date2
+recode az1prenegtest min/-1=. /* to exclude those with a negative test prior to first az dose*/
+
+recode az1prenegtest 0/max=1
+recode az1prenegtest 1=. if covid_vax_az_2_date2<negative_test_result_1_date2
+
+recode az1prenegtest 1=. if neg_syx!=1 /*to exclude people who had a negative test but did not have symptoms*/
+
+tab az1prenegtest
+
+/*combine az1prenegtest and az1prepositivetest*/
+
+gen az1pre_pos_or_neg_test=az1prepositivetest
+recode az1pre_pos_or_neg_test .=1 if az1prenegtest==1
+
+tab az1pre_pos_or_neg_test
+
+/* AZ1 received before a NEG test: 0 to 20 days after dose 1, andd >21 days after dose 1
+*/
+
+gen timeneg_az1=negative_test_result_1_date2 - covid_vax_az_1_date2
+recode timeneg_az1 min/-1=.
+recode timeneg_az1 0/20=1
+recode timeneg_az1 21/max=2
+
+gen az1_neg_0to20=az1prenegtest
+recode az1_neg_0to20 1=. if timeneg_az1==2
+tab az1_neg_0to20
+
+gen az1_neg_21plus=az1prenegtest
+recode az1_neg_21plus 1=. if timeneg_az1==1
+tab az1_neg_21plus 
+
+/*COMBINE 0-20 DAY POST AZ DOSE 1 pos and neg RESULTS for those vaccinated within 20 days of being tested (t1) */
+gen az1t1_vax=az1_pos_0to20
+recode az1t1 .=1 if az1_neg_0to20==1
+
+tab az1t1_vax 
+
+/*COMBINE 21 plus day post AZ dose 1 pos and neg results for those vaccinated more than 21 days before (t2) */
+
+gen az1t2_vax=az1_pos_21plus
+recode az1t2_vax .=1 if az1_neg_21plus==1
+tab az1t2_vax
+
+//**GENERATE A VARIABLE FOR PEOPLE VACCINATED WITH AZ DOSE 2 PRIOR TO THE TEST DATE**//
+
+/* Positive test after dose 2 but before dose 3 of any vaccine*/
+
+gen az2prepositivetest = positive_test_1_date2 - covid_vax_az_2_date2
+recode az2prepositivetest min/-1=.  /*to exclude -ve numbers ie tested before az dose 2) */
+
+
+recode az2prepositivetest 0/max=1
+recode az2prepositivetest 1=. if covid_vax_3_date2<positive_test_1_date2 /*(so that people are not included if they first test pos after THIRD dose of ANY vaccine) */
+
+recode az2prepositivetest 1=. if pos_syx!=1 /* (to exclude people who had a positive test but did not have symptoms) */
+
+tab az2prepositivetest
+
+//**Get the 2 different time periods for dose 2**//
+/* AZ2 received before a positive test: 0 to 13 days after vaccine, and >14 days after dose 2 */
+
+gen timepos_az2=positive_test_1_date2 - covid_vax_az_2_date2
+recode timepos_az2 min/-1=.
+recode timepos_az2 0/13=1
+recode timepos_az2 14/max=2
+
+gen az2_pos_0to13=az2prepositivetest
+recode az2_pos_0to13 1=. if timepos_az2==2
+
+gen az2_pos_14plus=az2prepositivetest
+recode az2_pos_14plus 1=. if timepos_az2==1
+tab az2_pos_14plus
+
+/* Negative test after dose 2 but before dose 3*/  
+
+gen az2prenegtest = negative_test_result_1_date2 - covid_vax_az_2_date2
+recode az2prenegtest min/-1=. /* to exclude those with a negative test prior to second AZ dose*/
+
+recode az2prenegtest 0/max=1
+recode az2prenegtest 1=. if covid_vax_3_date2<negative_test_result_1_date2
+
+recode az2prenegtest 1=. if neg_syx!=1 /*to exclude people who had a negative test but did not have symptoms*/
+
+tab az2prenegtest
+
+/*AZ2 received before a NEG test: 0 to 13 days after vaccine, and >14 days after dose 2**/
+
+
+gen timeneg_az2=negative_test_result_1_date2 - covid_vax_az_2_date2
+recode timeneg_az2 min/-1=.
+recode timeneg_az2 0/13=1
+recode timeneg_az2 14/max=2
+
+gen az2_neg_0to13=az2prenegtest
+recode az2_neg_0to13 1=. if timeneg_az2==2
+tab az2_neg_0to13
+
+gen az2_neg_14plus=az2prenegtest
+recode az2_neg_14plus 1=. if timeneg_az2==1
+tab az2_neg_14plus 
+
+/*COMBINE 0-13 DAY POST AZ DOSE 2 pos and neg RESULTS for those vaccinated within 13 days of being tested (t1) */
+gen az2t1_vax=az2_pos_0to13
+recode az2t1_vax .=1 if az2_neg_0to13==1
+
+tab az2t1_vax 
+
+/*COMBINE 14 plus day post AZ dose 2 pos and neg results for those vaccinated more than 14 days before (t2) */
+
+gen az2t2_vax=az2_pos_14plus
+recode az2t2_vax .=1 if az2_neg_14plus==1
+tab az2t2_vax
+
+
+////*************************UNVACCINATED************************////
+
+///***CREATE A VARIABLE FOR PEOPLE WHO ARE UNVACCINATED PRIOR TO THE TEST DATE***///
+
+//**generate a variable for receipt of first dose of either Pf or AZ at anytime**//
+
+gen pf1recd=1
+recode pf1recd 1=. if covid_vax_pfizer_1_date2==. /*i.e. have no record of 1st dose of Pfizer*/
+
+gen az1recd=1
+recode az1recd 1=. if covid_vax_az_1_date2==.
+
+
+
+//** create a variable to identify unvaccinated people (==1), either never had first dose of vaccine or had it after tested, and who were symptomatic and tested**//
+
+gen unvacpretest=.
+
+recode unvacpretest .=1 if pf1recd!=1 & az1recd!=1 /*(no record of ever having first dose of either Pf or AZ. I THINK IT does need to be '&' here, not '|'; if it is 'OR', people who have a record of first dose of either vaccine will be counted as  unvaccinated, which will not be correct)*/
+
+/*change to unvaccinated if had positive/negative result prior to first vaccine dose*/
+
+recode unvacpretest .=1 if covid_vax_pfizer_1_date2>positive_test_1_date2 & pf1recd==1 
+recode unvacpretest .=1 if covid_vax_az_1_date2>positive_test_1_date2 & az1recd==1
+recode unvacpretest .=1 if covid_vax_pfizer_1_date2>negative_test_result_1_date2 & pf1recd==1
+recode unvacpretest .=1 if covid_vax_az_1_date2>negative_test_result_1_date2 & az1recd==1
+
+recode unvacpretest 1=. if tested_syx==.
+
+tab unvacpretest  
+
+///*** Combine variables for vaccinated pre tested with  unvaccinated pre tested to get VACCINATION STATUS (0==unvaccinated, 1==vaccinated) for each time period ***///
+
+/*PFIZER*/
+
+gen vax_status_pf1_0to20=pd1t1_vax
+recode vax_status_pf1_0to20 .=0 if unvacpretest==1
+tab vax_status_pf1_0to20
+
+gen vax_status_pf1_21plus=pd1t2_vax
+recode vax_status_pf1_21plus .=0 if unvacpretest==1
+
+//***ADDITIONAL CODE SO PEOPLE WHO WERE VACCINATED AND HAD TEST RESULT IN TIME PERIOD 1 ARE NOT STILL COUNTED AS UNVACCINATED IN THE LATER TIME PERIOD ***///
+recode vax_status_pf1_21plus 0=. if vax_status_pf1_0to20==1
+*************************
+tab vax_status_pf1_21plus
+
+
+gen vax_status_pf2_0to13=pd2t1_vax
+recode vax_status_pf2_0to13 .=0 if unvacpretest==1
+
+recode vax_status_pf2_0to13 0=. if vax_status_pf1_0to20==1|vax_status_pf1_21plus==1
+
+tab vax_status_pf2_0to13
+
+gen vax_status_pf2_14plus=pd2t2_vax
+recode vax_status_pf2_14plus .=0 if unvacpretest==1
+
+recode vax_status_pf2_14plus 0=. if vax_status_pf1_0to20==1|vax_status_pf1_21plus==1|vax_status_pf2_0to13==1
+
+tab vax_status_pf2_14plus
+
+/*ASTRA ZENECA*/
+
+gen vax_status_az1_0to20=az1t1_vax
+recode vax_status_az1_0to20 .=0 if unvacpretest==1
+tab vax_status_az1_0to20
+
+gen vax_status_az1_21plus=az1t2_vax
+recode vax_status_az1_21plus .=0 if unvacpretest==1
+
+//***ADDITIONAL CODE SO PEOPLE WHO WERE VACCINATED AND HAD TEST RESULT IN TIME PERIOD 1 ARE NOT COUNTED AS UNVACCINATED IN THE LATER TIME PERIOD 2***///
+recode vax_status_az1_21plus 0=. if vax_status_az1_0to20==1
+
+tab vax_status_az1_21plus
+
+gen vax_status_az2_0to13=az2t1_vax
+recode vax_status_az2_0to13 .=0 if unvacpretest==1
+
+recode vax_status_az2_0to13 0=. if vax_status_az1_0to20==1|vax_status_az1_21plus==1
+
+tab vax_status_az2_0to13
+
+gen vax_status_az2_14plus=az2t2_vax
+recode vax_status_az2_14plus .=0 if unvacpretest==1
+
+recode vax_status_az2_14plus 0=. if vax_status_az1_0to20==1|vax_status_az1_21plus==1|vax_status_az2_0to13==1
+
+tab vax_status_az2_14plus
 
 
 // vaccine % and univariate analysis //- by age group, any type, d1, d2- grousp 0-20- 21+ and D2 14+ and time period before janry 8th and after
 		
 
-local desc2 "pd1t1 pd1t2 pd2t1 pd2t2 az1t1 az1t2 az2t1 az2t2 sex2 bmi2 carehome has_follow_up_previous_year  ethnicity region2 imd chronic_cardiac_disease diabetes_type_1 diabetes_type_2 diabetes_unknown_type current_copd dmards dementia dialysis solid_organ_transplantation chemo_or_radio intel_dis_incl_downs_syndrome lung_cancer cancer_excl_lung_and_haem haematological_cancer cystic_fibrosis sickle_cell_disease permanant_immunosuppression temporary_immunosuppression psychosis_schiz_bipolar asplenia"
+local desc2 "sex2 bmi2 carehome has_follow_up_previous_year  ethnicity region2 imd chronic_cardiac_disease diabetes_type_1 diabetes_type_2 diabetes_unknown_type current_copd dmards dementia dialysis solid_organ_transplantation chemo_or_radio intel_dis_incl_downs_syndrome lung_cancer cancer_excl_lung_and_haem haematological_cancer cystic_fibrosis sickle_cell_disease permanant_immunosuppression temporary_immunosuppression psychosis_schiz_bipolar asplenia immcomp"
 
 	
 foreach var of local desc2 {
-tab `var' covid2, col
-mhodds  covid2 `var'
+tab `var' tested_syx, col
+mhodds  tested_syx `var'
 }	
 
 local desc3 "carehome chronic_cardiac_disease diabetes_type_1 diabetes_type_2 diabetes_unknown_type current_copd dmards dementia dialysis solid_organ_transplantation chemo_or_radio intel_dis_incl_downs_syndrome lung_cancer cancer_excl_lung_and_haem haematological_cancer cystic_fibrosis sickle_cell_disease permanant_immunosuppression temporary_immunosuppression psychosis_schiz_bipolar asplenia "
 
 foreach var of local desc3 {
 tab `var'
-logistic pd1t1 pfd1res0to20 if `var'==1 & symptoms==1
+logistic tested_syx vax_status_pf1_0to20 if `var'==1 
 
-logistic pd1t2 pfd1res21plus if `var'==1 & symptoms==1
+logistic tested_syx vax_status_pf1_21plus if `var'==1 
 
-logistic pd2t1 pfd2res0to13 if `var'==1 & symptoms==1
+logistic tested_syx vax_status_pf2_0to13 if `var'==1 
 
-logistic pd2t2 pfd2res14plus if `var'==1 & symptoms==1
+logistic tested_syx vax_status_pf2_14plus if `var'==1 
 
-logistic az1t1 azd1res0to20 if `var'==1 & symptoms==1
+logistic tested_syx vax_status_az1_0to20 if `var'==1 
 
-logistic az1t2 azd1res21plus if `var'==1 & symptoms==1
+logistic tested_syx vax_status_az1_21plus if `var'==1 
 
-logistic az2t1 azd2res0to13 if `var'==1 & symptoms==1
+logistic tested_syx vax_status_az2_0to13 if `var'==1 
 
-logistic az2t2 azd2res14plus if `var'==1 & symptoms==1
-
+logistic tested_syx vax_status_az2_14plus if `var'==1 
 
 }
-//univariate and then mulivariate
+
 			
-// vaccine efficacy overall unadjuste and adjusted for minimal things
-///Pfizer dose 1
+///*VACCINE EFFICACY***///
 
-logistic   pd1t1 pfd1res0to20 if symptoms==1
-logistic   pd1t1 pfd1res0to20  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
-logistic   pd1t2 pfd1res21plus if symptoms==1
-logistic   pd1t2 pfd1res21plus  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
+//**OVERALL unadjusted and adjusted ORs**//
 
+/*PFIZER DOSES 1 & 2*/
 
-logistic   pd1t1 pfd1res0to20 if solid_organ_transplantation==1 & symptoms==1
-logistic   pd1t1 pfd1res0to20  age sex2 if solid_organ_transplantation==1 & symptoms==1
-logistic   pd1t2 pfd1res21plus  if solid_organ_transplantation==1 & symptoms==1
-logistic   pd1t2 pfd1res21plus  age sex2 if solid_organ_transplantation==1 & symptoms==1
+logistic  tested_syx vax_status_pf1_0to20 
+logistic  tested_syx vax_status_pf1_0to20  age sex2 bmi2 i.ethnicity i.region2 i.imd 
 
+logistic  tested_syx vax_status_pf1_21plus 
+logistic  tested_syx vax_status_pf1_21plus  age sex2 bmi2 i.ethnicity i.region2 i.imd 
 
-logistic   pd1t1 pfd1res0to20 if chemo_or_radio==1 & symptoms==1
-logistic   pd1t1 pfd1res0to20  age sex2 if chemo_or_radio==1 & symptoms==1
-logistic   pd1t2 pfd1res21plus  if chemo_or_radio==1 & symptoms==1
-logistic   pd1t2 pfd1res21plus  age sex2 if chemo_or_radio==1 & symptoms==1
+logistic  tested_syx vax_status_pf2_0to13 
+logistic  tested_syx vax_status_pf2_0to13  age sex2 bmi2 i.ethnicity i.region2 i.imd 
 
+logistic  tested_syx vax_status_pf2_14plus 
+logistic  tested_syx vax_status_pf2_14plus  age sex2 bmi2 i.ethnicity i.region2 i.imd 
 
-logistic   pd1t1 pfd1res0to20 if permanant_immunosuppression==1 & symptoms==1
-logistic   pd1t1 pfd1res0to20  age sex2 if permanant_immunosuppression==1 & symptoms==1
-logistic   pd1t2 pfd1res21plus  if permanant_immunosuppression==1 & symptoms==1
-logistic   pd1t2 pfd1res21plus  age sex2 if permanant_immunosuppression==1 & symptoms==1
+/*AZ DOSES 1 & 2*/
+logistic  tested_syx vax_status_az1_0to20 
+logistic  tested_syx vax_status_az1_0to20  age sex2 bmi2 i.ethnicity i.region2 i.imd 
 
-logistic   pd1t1 pfd1res0to20 if temporary_immunosuppression==1 & symptoms==1
-logistic   pd1t1 pfd1res0to20  age sex2 if temporary_immunosuppression==1 & symptoms==1
-logistic   pd1t2 pfd1res21plus  if temporary_immunosuppression==1 & symptoms==1
-logistic   pd1t2 pfd1res21plus  age sex2 if temporary_immunosuppression==1 & symptoms==1
+logistic  tested_syx vax_status_az1_21plus 
+logistic  tested_syx vax_status_az1_21plus  age sex2 bmi2 i.ethnicity i.region2 i.imd 
 
+logistic  tested_syx vax_status_az2_0to13 
+logistic  tested_syx vax_status_az2_0to13  age sex2 bmi2 i.ethnicity i.region2 i.imd 
 
-///Pfizer dose 2
-logistic   pd2t1 pfd2res0to13 if symptoms==1
-logistic   pd2t1 pfd2res0to13  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
-logistic   pd2t2 pfd2res14plus if symptoms==1
-logistic   pd2t2 pfd2res14plus  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
+logistic  tested_syx vax_status_az2_14plus 
+logistic  tested_syx vax_status_az2_14plus  age sex2 bmi2 i.ethnicity i.region2 i.imd 
 
+//**IMMUNOCOMPROMISED unadjusted and adjusted ORs**//
 
-logistic   pd2t1 pfd2res0to13 if solid_organ_transplantation==1 & symptoms==1
-logistic   pd2t1 pfd2res0to13  age sex2 if solid_organ_transplantation==1 & symptoms==1
-logistic   pd2t2 pfd2res14plus  if solid_organ_transplantation==1 & symptoms==1
-logistic   pd2t2 pfd2res14plus  age sex2 if solid_organ_transplantation==1 & symptoms==1
+/*PFIZER DOSES 1 & 2*/
 
+logistic  tested_syx vax_status_pf1_0to20 if immcomp==1
+logistic  tested_syx vax_status_pf1_0to20  age sex2 if immcomp==1 
 
-logistic   pd2t1 pfd2res0to13 if chemo_or_radio==1 & symptoms==1
-logistic   pd2t1 pfd2res0to13  age sex2 if chemo_or_radio==1 & symptoms==1
-logistic   pd2t2 pfd2res14plus  if chemo_or_radio==1 & symptoms==1
-logistic   pd2t2 pfd2res14plus  age sex2 if chemo_or_radio==1 & symptoms==1
+logistic  tested_syx vax_status_pf1_21plus if immcomp==1
+logistic  tested_syx vax_status_pf1_21plus  age sex2 if immcomp==1
 
-logistic   pd2t1 pfd2res0to13 if permanant_immunosuppression==1 & symptoms==1
-logistic   pd2t1 pfd2res0to13  age sex2 if permanant_immunosuppression==1 & symptoms==1
-logistic   pd2t2 pfd2res14plus  if permanant_immunosuppression==1 & symptoms==1
-logistic   pd2t2 pfd2res14plus  age sex2 if permanant_immunosuppression==1 & symptoms==1
+logistic  tested_syx vax_status_pf2_0to13 if immcomp==1
+logistic  tested_syx vax_status_pf2_0to13  age sex2 if immcomp==1 
+logistic  tested_syx vax_status_pf2_14plus if immcomp==1
+logistic  tested_syx vax_status_pf2_14plus  age sex2 if immcomp==1
 
-logistic   pd2t1 pfd2res0to13 if temporary_immunosuppression==1 & symptoms==1
-logistic   pd2t1 pfd2res0to13  age sex2 if temporary_immunosuppression==1 & symptoms==1
-logistic   pd2t2 pfd2res14plus  if temporary_immunosuppression==1 & symptoms==1
-logistic   pd2t2 pfd2res14plus  age sex2 if temporary_immunosuppression==1 & symptoms==1
+/*AZ DOSES 1 & 2*/
+logistic  tested_syx vax_status_az1_0to20 if immcomp==1
+logistic  tested_syx vax_status_az1_0to20  age sex2 if immcomp==1
 
+logistic  tested_syx vax_status_az1_21plus if immcomp==1
+logistic  tested_syx vax_status_az1_21plus  age sex2 if immcomp==1 
 
-///Astra Zeneca dose 1
-logistic   az1t1 azd1res0to20 if symptoms==1
-logistic   az1t1 azd1res0to20  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
-logistic   az1t2 azd1res21plus if symptoms==1
-logistic   az1t2 azd1res21plus  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
+logistic  tested_syx vax_status_az2_0to13 if immcomp==1
+logistic  tested_syx vax_status_az2_0to13  age sex2 if immcomp==1
 
+logistic  tested_syx vax_status_az2_14plus if immcomp==1
+logistic  tested_syx vax_status_az2_14plus  age sex2 if immcomp==1
 
-logistic   az1t1 azd1res0to20 if solid_organ_transplantation==1 & symptoms==1
-logistic   az1t1 azd1res0to20  age sex2 if solid_organ_transplantation==1 & symptoms==1
-logistic   az1t2 azd1res21plus  if solid_organ_transplantation==1 & symptoms==1
-logistic   az1t2 azd1res21plus  age sex2 if solid_organ_transplantation==1 & symptoms==1
-
-
-logistic   az1t1 azd1res0to20 if chemo_or_radio==1 & symptoms==1
-logistic   az1t1 azd1res0to20  age sex2 if chemo_or_radio==1 & symptoms==1
-logistic   az1t2 azd1res21plus  if chemo_or_radio==1 & symptoms==1
-logistic   az1t2 azd1res21plus  age sex2 if chemo_or_radio==1 & symptoms==1
-
-logistic   az1t1 azd1res0to20 if permanant_immunosuppression==1 & symptoms==1
-logistic   az1t1 azd1res0to20  age sex2 if permanant_immunosuppression==1 & symptoms==1
-logistic   az1t2 azd1res21plus  if permanant_immunosuppression==1 & symptoms==1
-logistic   az1t2 azd1res21plus  age sex2 if permanant_immunosuppression==1 & symptoms==1
-
-logistic   az1t1 azd1res0to20 if temporary_immunosuppression==1 & symptoms==1
-logistic   az1t1 azd1res0to20  age sex2 if temporary_immunosuppression==1 & symptoms==1
-logistic   az1t2 azd1res21plus  if temporary_immunosuppression==1 & symptoms==1
-logistic   az1t2 azd1res21plus  age sex2 if temporary_immunosuppression==1 & symptoms==1
-
-///Astra Zeneca dose 2
-logistic   az2t1 azd2res0to13 if symptoms==1
-logistic   az2t1 azd2res0to13  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
-logistic   az2t2 azd2res14plus if symptoms==1
-logistic   az2t2 azd2res14plus  age sex2 bmi2 i.ethnicity i.region2 i.imd if symptoms==1
-
-
-logistic   az2t1 azd2res0to13 if solid_organ_transplantation==1 & symptoms==1
-logistic   az2t1 azd2res0to13  age sex2 if solid_organ_transplantation==1 & symptoms==1
-logistic   az2t2 azd2res14plus  if solid_organ_transplantation==1 & symptoms==1
-logistic   az2t2 azd2res14plus  age sex2 if solid_organ_transplantation==1 & symptoms==1
-
-
-logistic   az2t1 azd2res0to13 if chemo_or_radio==1 & symptoms==1
-logistic   az2t1 azd2res0to13  age sex2 if chemo_or_radio==1 & symptoms==1
-logistic   az2t2 azd2res14plus  if chemo_or_radio==1 & symptoms==1
-logistic   az2t2 azd2res14plus  age sex2 if chemo_or_radio==1 & symptoms==1
-
-logistic   az2t1 azd2res0to13 if permanant_immunosuppression==1 & symptoms==1
-logistic   az2t1 azd2res0to13  age sex2 if permanant_immunosuppression==1 & symptoms==1
-logistic   az2t2 azd2res14plus  if permanant_immunosuppression==1 & symptoms==1
-logistic   az2t2 azd2res14plus  age sex2 if permanant_immunosuppression==1 & symptoms==1
-
-logistic   az2t1 azd2res0to13 if temporary_immunosuppression==1 & symptoms==1
-logistic   az2t1 azd1res0to20  age sex2 if temporary_immunosuppression==1 & symptoms==1
-logistic   az2t2 azd2res14plus  if temporary_immunosuppression==1 & symptoms==1
-logistic   az2t2 azd2res14plus  age sex2 if temporary_immunosuppression==1 & symptoms==1
 
 
 log close
