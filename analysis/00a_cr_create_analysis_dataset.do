@@ -59,7 +59,7 @@ gen neg= negative_test_result_1_date2
 recode neg min/max=1
 tab neg
 
-gen testtime=pos-neg
+gen testtime=positive_test_1_date2-negative_test_result_1_date2 
 recode testtime -21/20=0
 recode neg 1=. if testtime==0
 tab testtime
@@ -84,8 +84,9 @@ foreach var of local desc {
 
 //**Generate variable for people with symptoms, 0 no symtpoms, 1 symptoms**//
 
-gen syx = 0
-recode syx 0=1 if symptomatic_people=="Y"
+gen syx = .
+recode syx .=1 if symptomatic_people=="Y"
+recode syx .=0 if symptomatic_people=="N"
 tab syx
 
 //** DEFINE POS TEST WITH SYMPTOMS**//
@@ -103,6 +104,7 @@ tab neg_syx
 
 gen tested_syx = pos_syx
 recode tested_syx .=0 if neg_syx==1
+tab tested_syx
 
 //**GENERATE A VARIABLE FOR PEOPLE VACCINATED WITH PFIZER DOSE 1 PRIOR TO THE TEST DATE**//
 
@@ -110,7 +112,6 @@ recode tested_syx .=0 if neg_syx==1
 
 gen pf1prepositivetest = positive_test_1_date2 - covid_vax_pfizer_1_date2
 recode pf1prepositivetest min/-1=.  /*to exclude -ve numbers ie testesd before pfizer dose 1) */
-
 
 recode pf1prepositivetest 0/max=1
 recode pf1prepositivetest 1=. if covid_vax_pfizer_2_date2<positive_test_1_date2 /*(so that people are not included if they first test pos after SECOND dose) */
@@ -129,12 +130,11 @@ recode timepos_pd1 21/max=2
 
 gen pd1_pos_0to20=pf1prepositivetest
 recode pd1_pos_0to20 1=. if timepos_pd1==2
+tab pd1_pos_0to20
 
 gen pd1_pos_21plus=pf1prepositivetest
 recode pd1_pos_21plus 1=. if timepos_pd1==1
 tab pd1_pos_21plus
-
-
 
 
 /* Negative test after dose 1 but before dose 2*/  
@@ -203,6 +203,7 @@ recode timepos_pd2 14/max=2
 
 gen pd2_pos_0to13=pf2prepositivetest
 recode pd2_pos_0to13 1=. if timepos_pd2==2
+tab pd2_pos_0to13
 
 gen pd2_pos_14plus=pf2prepositivetest
 recode pd2_pos_14plus 1=. if timepos_pd2==1
@@ -443,8 +444,10 @@ tab vax_status_pf1_0to20
 gen vax_status_pf1_21plus=pd1t2_vax
 recode vax_status_pf1_21plus .=0 if unvacpretest==1
 
+
 //***ADDITIONAL CODE SO PEOPLE WHO WERE VACCINATED AND HAD TEST RESULT IN TIME PERIOD 1 ARE NOT STILL COUNTED AS UNVACCINATED IN THE LATER TIME PERIOD ***///
 recode vax_status_pf1_21plus 0=. if vax_status_pf1_0to20==1
+recode vax_status_pf1_21plus 1=. if vax_status_pf1_0to20==1
 *************************
 tab vax_status_pf1_21plus
 
@@ -453,14 +456,14 @@ gen vax_status_pf2_0to13=pd2t1_vax
 recode vax_status_pf2_0to13 .=0 if unvacpretest==1
 
 recode vax_status_pf2_0to13 0=. if vax_status_pf1_0to20==1|vax_status_pf1_21plus==1
-
+recode vax_status_pf2_0to13 1=. if vax_status_pf1_0to20==1|vax_status_pf1_21plus==1
 tab vax_status_pf2_0to13
 
 gen vax_status_pf2_14plus=pd2t2_vax
 recode vax_status_pf2_14plus .=0 if unvacpretest==1
 
 recode vax_status_pf2_14plus 0=. if vax_status_pf1_0to20==1|vax_status_pf1_21plus==1|vax_status_pf2_0to13==1
-
+recode vax_status_pf2_14plus 1=. if vax_status_pf1_0to20==1|vax_status_pf1_21plus==1|vax_status_pf2_0to13==1
 tab vax_status_pf2_14plus
 
 /*ASTRA ZENECA*/
@@ -474,21 +477,21 @@ recode vax_status_az1_21plus .=0 if unvacpretest==1
 
 //***ADDITIONAL CODE SO PEOPLE WHO WERE VACCINATED AND HAD TEST RESULT IN TIME PERIOD 1 ARE NOT COUNTED AS UNVACCINATED IN THE LATER TIME PERIOD 2***///
 recode vax_status_az1_21plus 0=. if vax_status_az1_0to20==1
-
+recode vax_status_az1_21plus 1=. if vax_status_az1_0to20==1
 tab vax_status_az1_21plus
 
 gen vax_status_az2_0to13=az2t1_vax
 recode vax_status_az2_0to13 .=0 if unvacpretest==1
 
 recode vax_status_az2_0to13 0=. if vax_status_az1_0to20==1|vax_status_az1_21plus==1
-
+recode vax_status_az2_0to13 1=. if vax_status_az1_0to20==1|vax_status_az1_21plus==1
 tab vax_status_az2_0to13
 
 gen vax_status_az2_14plus=az2t2_vax
 recode vax_status_az2_14plus .=0 if unvacpretest==1
 
 recode vax_status_az2_14plus 0=. if vax_status_az1_0to20==1|vax_status_az1_21plus==1|vax_status_az2_0to13==1
-
+recode vax_status_az2_14plus 1=. if vax_status_az1_0to20==1|vax_status_az1_21plus==1|vax_status_az2_0to13==1
 tab vax_status_az2_14plus
 
 
@@ -507,20 +510,29 @@ local desc3 "carehome chronic_cardiac_disease diabetes_type_1 diabetes_type_2 di
 
 foreach var of local desc3 {
 tab `var'
+
+tab tested_syx vax_status_pf1_0to20 if `var'==1
 logistic tested_syx vax_status_pf1_0to20 if `var'==1 
 
+tab tested_syx vax_status_pf1_21plus if `var'==1
 logistic tested_syx vax_status_pf1_21plus if `var'==1 
 
+tab tested_syx vax_status_pf2_0to13 if `var'==1
 logistic tested_syx vax_status_pf2_0to13 if `var'==1 
 
+tab tested_syx vax_status_pf2_14plus if `var'==1 
 logistic tested_syx vax_status_pf2_14plus if `var'==1 
 
+tab tested_syx vax_status_az1_0to20 if `var'==1
 logistic tested_syx vax_status_az1_0to20 if `var'==1 
 
+tab tested_syx vax_status_az1_21plus if `var'==1
 logistic tested_syx vax_status_az1_21plus if `var'==1 
 
+tab tested_syx vax_status_az2_0to13 if `var'==1
 logistic tested_syx vax_status_az2_0to13 if `var'==1 
 
+tab tested_syx vax_status_az2_14plus if `var'==1 
 logistic tested_syx vax_status_az2_14plus if `var'==1 
 
 }
@@ -528,63 +540,106 @@ logistic tested_syx vax_status_az2_14plus if `var'==1
 			
 ///*VACCINE EFFICACY***///
 
-//**OVERALL unadjusted and adjusted ORs**//
+///***ADJUSTING FOR TIME OF TESTING***///
+
+/*Generate a variable for ISO week for week of test*/
+
+gen ISOweekpos =int((doy(7*int((positive_test_1_date2-mdy(1,1,1900))/7)+ mdy(1,1,1900) + 3)+6)/7)
+gen ISOweekneg =int((doy(7*int((negative_test_result_1_date2-mdy(1,1,1900))/7)+ mdy(1,1,1900) + 3)+6)/7)
+gen isoweek=ISOweekpos
+replace isoweek=ISOweekneg if isoweek==.
+
+//**CROSS TABS AND OVERALL unadjusted and adjusted ORs, including separate model with adjustment for test week**//
 
 /*PFIZER DOSES 1 & 2*/
 
+tab tested_syx vax_status_pf1_0to20
 logistic  tested_syx vax_status_pf1_0to20 
 logistic  tested_syx vax_status_pf1_0to20  age sex2 bmi2 i.ethnicity i.region2 i.imd 
+logistic  tested_syx vax_status_pf1_0to20  age sex2 bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
+tab tested_syx vax_status_pf1_21plus
 logistic  tested_syx vax_status_pf1_21plus 
 logistic  tested_syx vax_status_pf1_21plus  age sex2 bmi2 i.ethnicity i.region2 i.imd 
+logistic  tested_syx vax_status_pf1_21plus  age sex2 bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
+tab tested_syx vax_status_pf2_0to13
 logistic  tested_syx vax_status_pf2_0to13 
 logistic  tested_syx vax_status_pf2_0to13  age sex2 bmi2 i.ethnicity i.region2 i.imd 
+logistic  tested_syx vax_status_pf2_0to13  age sex2 bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
+tab tested_syx vax_status_pf2_14plus
 logistic  tested_syx vax_status_pf2_14plus 
 logistic  tested_syx vax_status_pf2_14plus  age sex2 bmi2 i.ethnicity i.region2 i.imd 
+logistic  tested_syx vax_status_pf2_14plus  age sex2 bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 /*AZ DOSES 1 & 2*/
+
+tab tested_syx vax_status_az1_0to20
 logistic  tested_syx vax_status_az1_0to20 
 logistic  tested_syx vax_status_az1_0to20  age sex2 bmi2 i.ethnicity i.region2 i.imd 
+logistic  tested_syx vax_status_az1_0to20  age sex2 bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
+tab tested_syx vax_status_az1_21plus
 logistic  tested_syx vax_status_az1_21plus 
 logistic  tested_syx vax_status_az1_21plus  age sex2 bmi2 i.ethnicity i.region2 i.imd 
+logistic  tested_syx vax_status_az1_21plus  age sex2 bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
+tab tested_syx vax_status_az2_0to13
 logistic  tested_syx vax_status_az2_0to13 
 logistic  tested_syx vax_status_az2_0to13  age sex2 bmi2 i.ethnicity i.region2 i.imd 
+logistic  tested_syx vax_status_az2_0to13  age sex2 bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
+tab tested_syx vax_status_az2_14plus
 logistic  tested_syx vax_status_az2_14plus 
 logistic  tested_syx vax_status_az2_14plus  age sex2 bmi2 i.ethnicity i.region2 i.imd 
+logistic  tested_syx vax_status_az2_14plus  age sex2 bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 //**IMMUNOCOMPROMISED unadjusted and adjusted ORs**//
 
 /*PFIZER DOSES 1 & 2*/
 
+tab tested_syx vax_status_pf1_0to20 if immcomp==1
 logistic  tested_syx vax_status_pf1_0to20 if immcomp==1
 logistic  tested_syx vax_status_pf1_0to20  age sex2 if immcomp==1 
+logistic  tested_syx vax_status_pf1_0to20  age sex2 i.isoweek if immcomp==1
 
+tab tested_syx vax_status_pf1_21plus if immcomp==1
 logistic  tested_syx vax_status_pf1_21plus if immcomp==1
 logistic  tested_syx vax_status_pf1_21plus  age sex2 if immcomp==1
+logistic  tested_syx vax_status_pf1_21plus  age sex2 i.isoweek if immcomp==1
 
+tab tested_syx vax_status_pf2_0to13 if immcomp==1
 logistic  tested_syx vax_status_pf2_0to13 if immcomp==1
 logistic  tested_syx vax_status_pf2_0to13  age sex2 if immcomp==1 
+logistic  tested_syx vax_status_pf2_0to13  age sex2 i.isoweek if immcomp==1 
+
+tab tested_syx vax_status_pf2_14plus if immcomp==1
 logistic  tested_syx vax_status_pf2_14plus if immcomp==1
 logistic  tested_syx vax_status_pf2_14plus  age sex2 if immcomp==1
+logistic  tested_syx vax_status_pf2_14plus  age sex2 i.isoweek if immcomp==1
 
 /*AZ DOSES 1 & 2*/
+
+tab tested_syx vax_status_az1_0to20 if immcomp==1
 logistic  tested_syx vax_status_az1_0to20 if immcomp==1
 logistic  tested_syx vax_status_az1_0to20  age sex2 if immcomp==1
+logistic  tested_syx vax_status_az1_0to20  age sex2 i.isoweek if immcomp==1
 
+tab tested_syx vax_status_az1_21plus if immcomp==1
 logistic  tested_syx vax_status_az1_21plus if immcomp==1
 logistic  tested_syx vax_status_az1_21plus  age sex2 if immcomp==1 
+logistic  tested_syx vax_status_az1_21plus  age sex2 i.isoweek if immcomp==1 
 
+tab tested_syx vax_status_az2_0to13 if immcomp==1
 logistic  tested_syx vax_status_az2_0to13 if immcomp==1
 logistic  tested_syx vax_status_az2_0to13  age sex2 if immcomp==1
+logistic  tested_syx vax_status_az2_0to13  age sex2 i.isoweek if immcomp==1
 
+tab tested_syx vax_status_az2_14plus if immcomp==1
 logistic  tested_syx vax_status_az2_14plus if immcomp==1
 logistic  tested_syx vax_status_az2_14plus  age sex2 if immcomp==1
-
+logistic  tested_syx vax_status_az2_14plus  age sex2 i.isoweek if immcomp==1
 
 
 log close
