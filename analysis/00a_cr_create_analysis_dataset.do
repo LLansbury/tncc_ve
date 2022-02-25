@@ -52,10 +52,12 @@ recode carehome 1/3=1 .=0
 
 
 gen pos=positive_test_1_date2
+replace pos=. if prior_positive_test_date!=""
 recode pos min/max=1
 tab pos
 
 gen neg= negative_test_result_1_date2
+replace neg=. if prior_positive_test_date!=""
 recode neg min/max=1
 tab neg
 
@@ -555,45 +557,45 @@ replace isoweek=ISOweekneg if isoweek==.
 
 tab tested_syx vax_status_pf1_0to20
 logistic  tested_syx vax_status_pf1_0to20 
-logistic  tested_syx vax_status_pf1_0to20  age sex2 bmi2 i.ethnicity i.region2 i.imd 
-logistic  tested_syx vax_status_pf1_0to20  age sex2 bmi2 i.ethnicity i.region2 i.imd i.isoweek
+logistic  tested_syx vax_status_pf1_0to20  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd 
+logistic  tested_syx vax_status_pf1_0to20  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 tab tested_syx vax_status_pf1_21plus
 logistic  tested_syx vax_status_pf1_21plus 
-logistic  tested_syx vax_status_pf1_21plus  age sex2 bmi2 i.ethnicity i.region2 i.imd 
-logistic  tested_syx vax_status_pf1_21plus  age sex2 bmi2 i.ethnicity i.region2 i.imd i.isoweek
+logistic  tested_syx vax_status_pf1_21plus  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd 
+logistic  tested_syx vax_status_pf1_21plus  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 tab tested_syx vax_status_pf2_0to13
 logistic  tested_syx vax_status_pf2_0to13 
-logistic  tested_syx vax_status_pf2_0to13  age sex2 bmi2 i.ethnicity i.region2 i.imd 
-logistic  tested_syx vax_status_pf2_0to13  age sex2 bmi2 i.ethnicity i.region2 i.imd i.isoweek
+logistic  tested_syx vax_status_pf2_0to13  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd 
+logistic  tested_syx vax_status_pf2_0to13  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 tab tested_syx vax_status_pf2_14plus
 logistic  tested_syx vax_status_pf2_14plus 
-logistic  tested_syx vax_status_pf2_14plus  age sex2 bmi2 i.ethnicity i.region2 i.imd 
-logistic  tested_syx vax_status_pf2_14plus  age sex2 bmi2 i.ethnicity i.region2 i.imd i.isoweek
+logistic  tested_syx vax_status_pf2_14plus  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd 
+logistic  tested_syx vax_status_pf2_14plus  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 /*AZ DOSES 1 & 2*/
 
 tab tested_syx vax_status_az1_0to20
 logistic  tested_syx vax_status_az1_0to20 
-logistic  tested_syx vax_status_az1_0to20  age sex2 bmi2 i.ethnicity i.region2 i.imd 
-logistic  tested_syx vax_status_az1_0to20  age sex2 bmi2 i.ethnicity i.region2 i.imd i.isoweek
+logistic  tested_syx vax_status_az1_0to20  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd 
+logistic  tested_syx vax_status_az1_0to20  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 tab tested_syx vax_status_az1_21plus
 logistic  tested_syx vax_status_az1_21plus 
-logistic  tested_syx vax_status_az1_21plus  age sex2 bmi2 i.ethnicity i.region2 i.imd 
-logistic  tested_syx vax_status_az1_21plus  age sex2 bmi2 i.ethnicity i.region2 i.imd i.isoweek
+logistic  tested_syx vax_status_az1_21plus  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd 
+logistic  tested_syx vax_status_az1_21plus  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 tab tested_syx vax_status_az2_0to13
 logistic  tested_syx vax_status_az2_0to13 
-logistic  tested_syx vax_status_az2_0to13  age sex2 bmi2 i.ethnicity i.region2 i.imd 
-logistic  tested_syx vax_status_az2_0to13  age sex2 bmi2 i.ethnicity i.region2 i.imd i.isoweek
+logistic  tested_syx vax_status_az2_0to13  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd 
+logistic  tested_syx vax_status_az2_0to13  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 tab tested_syx vax_status_az2_14plus
 logistic  tested_syx vax_status_az2_14plus 
-logistic  tested_syx vax_status_az2_14plus  age sex2 bmi2 i.ethnicity i.region2 i.imd 
-logistic  tested_syx vax_status_az2_14plus  age sex2 bmi2 i.ethnicity i.region2 i.imd i.isoweek
+logistic  tested_syx vax_status_az2_14plus  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd 
+logistic  tested_syx vax_status_az2_14plus  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 //**IMMUNOCOMPROMISED unadjusted and adjusted ORs**//
 
@@ -601,45 +603,45 @@ logistic  tested_syx vax_status_az2_14plus  age sex2 bmi2 i.ethnicity i.region2 
 
 tab tested_syx vax_status_pf1_0to20 if immcomp==1
 logistic  tested_syx vax_status_pf1_0to20 if immcomp==1
-logistic  tested_syx vax_status_pf1_0to20  age sex2 if immcomp==1 
-logistic  tested_syx vax_status_pf1_0to20  age sex2 i.isoweek if immcomp==1
+logistic  tested_syx vax_status_pf1_0to20  i.ageg carehome sex2 if immcomp==1 
+logistic  tested_syx vax_status_pf1_0to20  i.ageg carehome sex2 i.isoweek if immcomp==1
 
 tab tested_syx vax_status_pf1_21plus if immcomp==1
 logistic  tested_syx vax_status_pf1_21plus if immcomp==1
-logistic  tested_syx vax_status_pf1_21plus  age sex2 if immcomp==1
-logistic  tested_syx vax_status_pf1_21plus  age sex2 i.isoweek if immcomp==1
+logistic  tested_syx vax_status_pf1_21plus  i.ageg carehome sex2 if immcomp==1
+logistic  tested_syx vax_status_pf1_21plus  i.ageg carehome sex2 i.isoweek if immcomp==1
 
 tab tested_syx vax_status_pf2_0to13 if immcomp==1
 logistic  tested_syx vax_status_pf2_0to13 if immcomp==1
-logistic  tested_syx vax_status_pf2_0to13  age sex2 if immcomp==1 
-logistic  tested_syx vax_status_pf2_0to13  age sex2 i.isoweek if immcomp==1 
+logistic  tested_syx vax_status_pf2_0to13  i.ageg carehome sex2 if immcomp==1 
+logistic  tested_syx vax_status_pf2_0to13  i.ageg carehome sex2 i.isoweek if immcomp==1 
 
 tab tested_syx vax_status_pf2_14plus if immcomp==1
 logistic  tested_syx vax_status_pf2_14plus if immcomp==1
-logistic  tested_syx vax_status_pf2_14plus  age sex2 if immcomp==1
-logistic  tested_syx vax_status_pf2_14plus  age sex2 i.isoweek if immcomp==1
+logistic  tested_syx vax_status_pf2_14plus  i.ageg carehome sex2 if immcomp==1
+logistic  tested_syx vax_status_pf2_14plus  i.ageg carehome sex2 i.isoweek if immcomp==1
 
 /*AZ DOSES 1 & 2*/
 
 tab tested_syx vax_status_az1_0to20 if immcomp==1
 logistic  tested_syx vax_status_az1_0to20 if immcomp==1
-logistic  tested_syx vax_status_az1_0to20  age sex2 if immcomp==1
-logistic  tested_syx vax_status_az1_0to20  age sex2 i.isoweek if immcomp==1
+logistic  tested_syx vax_status_az1_0to20  i.ageg carehome sex2 if immcomp==1
+logistic  tested_syx vax_status_az1_0to20  i.ageg carehome sex2 i.isoweek if immcomp==1
 
 tab tested_syx vax_status_az1_21plus if immcomp==1
 logistic  tested_syx vax_status_az1_21plus if immcomp==1
-logistic  tested_syx vax_status_az1_21plus  age sex2 if immcomp==1 
-logistic  tested_syx vax_status_az1_21plus  age sex2 i.isoweek if immcomp==1 
+logistic  tested_syx vax_status_az1_21plus  i.ageg carehome sex2 if immcomp==1 
+logistic  tested_syx vax_status_az1_21plus  i.ageg carehome sex2 i.isoweek if immcomp==1 
 
 tab tested_syx vax_status_az2_0to13 if immcomp==1
 logistic  tested_syx vax_status_az2_0to13 if immcomp==1
-logistic  tested_syx vax_status_az2_0to13  age sex2 if immcomp==1
-logistic  tested_syx vax_status_az2_0to13  age sex2 i.isoweek if immcomp==1
+logistic  tested_syx vax_status_az2_0to13  i.ageg carehome sex2 if immcomp==1
+logistic  tested_syx vax_status_az2_0to13  i.ageg carehome sex2 i.isoweek if immcomp==1
 
 tab tested_syx vax_status_az2_14plus if immcomp==1
 logistic  tested_syx vax_status_az2_14plus if immcomp==1
-logistic  tested_syx vax_status_az2_14plus  age sex2 if immcomp==1
-logistic  tested_syx vax_status_az2_14plus  age sex2 i.isoweek if immcomp==1
+logistic  tested_syx vax_status_az2_14plus  i.ageg carehome sex2 if immcomp==1
+logistic  tested_syx vax_status_az2_14plus  i.ageg carehome sex2 i.isoweek if immcomp==1
 
 
 log close
