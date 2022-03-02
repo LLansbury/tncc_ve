@@ -10,6 +10,7 @@ from cohortextractor import (
 
 # Important Dates
 campaign_start = "2020-12-07" # the day before vaccines were rolled-out in England
+start_date = "2021-01-01"
 latest_date = "2021-06-08" # change this when more data become available - see https://github.com/opensafely/database-notebooks/blob/master/notebooks/database-builds.ipynb
 
 # Import Codelists
@@ -25,8 +26,8 @@ study = StudyDefinition(
         "incidence": 0.2,
     },
         
-    # set the index date to be the campaign start -- change if necessasry
-    index_date = campaign_start, 
+    # set the index date to be the start date of study period-- change if necessasry
+    index_date = start_date, 
 
     # This line defines the study population
     # change this to extract data for a different set of patients
@@ -95,7 +96,7 @@ study = StudyDefinition(
 
     # was the patient registered at the same practice throught the previous year?
     has_follow_up_previous_year=patients.registered_with_one_practice_between(
-        start_date="index_date - 1 year",
+        start_date_fu="index_date - 1 year",
         end_date="index_date",
         return_expectations={"incidence": 0.95},
     ),
@@ -333,7 +334,7 @@ study = StudyDefinition(
         date_format="YYYY-MM-DD",
         return_expectations={
             "date": {
-                "earliest": "2020-12-08",  # first vaccine administered on the 8/12
+                "earliest": "2021-01-01",  # first vaccine administered on the 8/12
                 "latest": "2021-06-08",
             }
         },
@@ -348,7 +349,7 @@ study = StudyDefinition(
         date_format="YYYY-MM-DD",
         return_expectations={
             "date": {
-                "earliest": "2020-12-29",  # first reported second dose administered on the 29/12
+                "earliest": "2021-01-01",  # first reported second dose administered on the 29/12
                 "latest": "2021-06-08",
             }
         },
@@ -363,7 +364,7 @@ study = StudyDefinition(
         date_format="YYYY-MM-DD",
         return_expectations={
             "date": {
-                "earliest": "2020-12-29",  # first reported second dose administered on the 29/12
+                "earliest": "2021-01-01",  # first reported second dose administered on the 29/12
                 "latest": "2021-06-08",
             }
         },
@@ -378,7 +379,7 @@ study = StudyDefinition(
         date_format="YYYY-MM-DD",
         return_expectations={
             "date": {
-                "earliest": "2020-12-29",  # first reported second dose administered on the 29/12
+                "earliest": "2021-01-01",  # first reported second dose administered on the 29/12
                 "latest": "2021-06-08",
             }
         },
@@ -459,7 +460,7 @@ study = StudyDefinition(
         on_or_before="index_date",
         find_first_match_in_period=True,
         return_expectations={
-            "date": {"earliest": "2020-02-01"},
+            "date": {"earliest": "2020-02-01", "latest": "2020-12-31"},
             "rate": "exponential_increase",
         },
     ),
