@@ -48,6 +48,11 @@ recode carehome 1/3=1 .=0
 ///***DEFINE COVID DIAGNOSIS, 1 = positive Covid test, 0 = negative Covid test)***///
 //** Generate a variable for positive test and negative tests (excluding neg tests that are within 3 weeks of a positive test) **//
 
+/******ENSURE ONLY TESTS DONE BETWEEN 01 Jan 2021 and 8 June 2021 are included****/
+
+replace positive_test_1_date2=. if positive_test_1_date2<22281|positive_test_1_date2>22439
+replace negative_test_result_1_date2=. if negative_test_result_1_date2<22281|negative_test_result_1_date2>22439
+
 /*generate a code for negative tests that are within 3 weeks of a positive test*/
 
 
