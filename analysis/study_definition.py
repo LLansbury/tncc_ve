@@ -96,7 +96,7 @@ study = StudyDefinition(
 
     # was the patient registered at the same practice throught the previous year?
     has_follow_up_previous_year=patients.registered_with_one_practice_between(
-        start_date_fu="index_date - 1 year",
+        start_date="index_date - 1 year",
         end_date="index_date",
         return_expectations={"incidence": 0.95},
     ),
