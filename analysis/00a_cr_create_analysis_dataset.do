@@ -132,13 +132,13 @@ tab syx
 
 //** DEFINE POS TEST WITH SYMPTOMS**//
 gen pos_syx = pos
-recode pos_syx 1=. if syx==0
+recode pos_syx 1=. if syx==0|syx==.
 tab pos_syx
 
 //**DEFINE NEG test with symptoms**//
 
 gen neg_syx = neg
-recode neg_syx 1=. if syx==0
+recode neg_syx 1=. if syx==0|syx==.
 tab neg_syx
 
 //**GENERATE A VARIABLE FOR SYMPTOMATIC PEOPLE WHO HAVE A TEST RESULT (either positive or neg) 1= positive test with syx, 0== neg test with symptoms**//
@@ -190,14 +190,14 @@ tab vax1prenegtest_first_period
 
 /*Two different time periods for neeg test after dose 1*/
 
-gen timeneg_vax1=negative_test_result_1_date2-covid_vax_2_date2
+gen timeneg_vax1=negative_test_result_1_date2-covid_vax_1_date2
 recode timeneg_vax1 min/-1=.
 recode timeneg_vax1 0/20 =1
 recode timeneg_vax1 21/max=2
 
 gen vax1_neg_0to20_first_period=vax1prenegtest_first_period
 recode vax1_neg_0to20_first_period 1=. if timeneg_vax1==2
-tab vax1_pos_0to20_first_period
+tab vax1_neg_0to20_first_period
 
 gen vax1_neg_21plus_first_period=vax1prenegtest_first_period
 recode vax1_neg_21plus_first_period 1=. if timeneg_vax1==1
@@ -788,28 +788,35 @@ gen ISOweekneg =int((doy(7*int((negative_test_result_1_date2-mdy(1,1,1900))/7)+ 
 gen isoweek=ISOweekpos
 replace isoweek=ISOweekneg if isoweek==.
 
+/*gen numbered time periods 1 to 3*/
+
+gen timeperiod=.
+replace timeperiod=1 if postestdate_first_period2!=.|negtestdate_first_period2!=.
+replace timeperiod=2 if postestdate_second_period2!=.|negtestdate_second_period2!=.
+replace timeperiod=3 if postestdate_third_period2!=.|negtestdate_third_period2!=.
+
+/*tab to check if reporting of symptoms differs between the tike periods (tested_syx : 0 = neg test but symptoms; 1= pos test with symtpoms)*/
+
+tab tested_syx timeperiod
+
 //**CROSS TABS AND OVERALL unadjusted and adjusted ORs, including separate model with adjustment for test week**//
 
 /*ANY COVID VACCINE DOSES 1 & 2 FOR FIRST PERIOD JAN TO JUN 2021*/
 
 tab tested_syx vax_status_any1_0to20
 logistic  tested_syx vax_status_any1_0to20 
-logistic  tested_syx vax_status_any1_0to20  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd 
 logistic  tested_syx vax_status_any1_0to20  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 tab tested_syx vax_status_any1_21plus
 logistic  tested_syx vax_status_any1_21plus 
-logistic  tested_syx vax_status_any1_21plus  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd 
 logistic  tested_syx vax_status_any1_21plus  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 tab tested_syx vax_status_any2_0to13
 logistic  tested_syx vax_status_any2_0to13 
-logistic  tested_syx vax_status_any2_0to13  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd 
 logistic  tested_syx vax_status_any2_0to13  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 tab tested_syx vax_status_any2_14plus
 logistic  tested_syx vax_status_any2_14plus 
-logistic  tested_syx vax_status_any2_14plus  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd 
 logistic  tested_syx vax_status_any2_14plus  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 
@@ -817,44 +824,36 @@ logistic  tested_syx vax_status_any2_14plus  i.ageg sex2 carehome bmi2 i.ethnici
 
 tab tested_syx vax_status_pf1_0to20
 logistic  tested_syx vax_status_pf1_0to20 
-logistic  tested_syx vax_status_pf1_0to20  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd 
 logistic  tested_syx vax_status_pf1_0to20  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 tab tested_syx vax_status_pf1_21plus
 logistic  tested_syx vax_status_pf1_21plus 
-logistic  tested_syx vax_status_pf1_21plus  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd 
 logistic  tested_syx vax_status_pf1_21plus  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 tab tested_syx vax_status_pf2_0to13
 logistic  tested_syx vax_status_pf2_0to13 
-logistic  tested_syx vax_status_pf2_0to13  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd 
 logistic  tested_syx vax_status_pf2_0to13  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 tab tested_syx vax_status_pf2_14plus
 logistic  tested_syx vax_status_pf2_14plus 
-logistic  tested_syx vax_status_pf2_14plus  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd 
 logistic  tested_syx vax_status_pf2_14plus  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 /*AZ DOSES 1 & 2*/
 
 tab tested_syx vax_status_az1_0to20
 logistic  tested_syx vax_status_az1_0to20 
-logistic  tested_syx vax_status_az1_0to20  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd 
 logistic  tested_syx vax_status_az1_0to20  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 tab tested_syx vax_status_az1_21plus
 logistic  tested_syx vax_status_az1_21plus 
-logistic  tested_syx vax_status_az1_21plus  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd 
 logistic  tested_syx vax_status_az1_21plus  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 tab tested_syx vax_status_az2_0to13
 logistic  tested_syx vax_status_az2_0to13 
-logistic  tested_syx vax_status_az2_0to13  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd 
 logistic  tested_syx vax_status_az2_0to13  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 tab tested_syx vax_status_az2_14plus
 logistic  tested_syx vax_status_az2_14plus 
-logistic  tested_syx vax_status_az2_14plus  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd 
 logistic  tested_syx vax_status_az2_14plus  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 //**IMMUNOCOMPROMISED unadjusted and adjusted ORs**//
@@ -862,66 +861,54 @@ logistic  tested_syx vax_status_az2_14plus  i.ageg sex2 carehome bmi2 i.ethnicit
 /*ANY vaccine*/
 tab tested_syx vax_status_any1_0to20 if immcomp==1
 logistic  tested_syx vax_status_any1_0to20  if immcomp==1
-logistic  tested_syx vax_status_any1_0to20  i.ageg carehome sex2 if immcomp==1 
 logistic  tested_syx vax_status_any1_0to20  i.ageg carehome sex2 i.isoweek if immcomp==1
 
 tab tested_syx vax_status_any1_21plus if immcomp==1
 logistic  tested_syx vax_status_any1_21plus if immcomp==1
-logistic  tested_syx vax_status_any1_21plus  i.ageg carehome sex2 if immcomp==1
 logistic  tested_syx vax_status_any1_21plus  i.ageg carehome sex2 i.isoweek if immcomp==1
 
 tab tested_syx vax_status_any2_0to13 if immcomp==1
 logistic  tested_syx vax_status_any2_0to13 if immcomp==1
-logistic  tested_syx vax_status_any2_0to13  i.ageg carehome sex2 if immcomp==1 
 logistic  tested_syx vax_status_any2_0to13  i.ageg carehome sex2 i.isoweek if immcomp==1 
 
 tab tested_syx vax_status_any2_14plus if immcomp==1
 logistic  tested_syx vax_status_any2_14plus if immcomp==1
-logistic  tested_syx vax_status_any2_14plus  i.ageg carehome sex2 if immcomp==1
 logistic  tested_syx vax_status_any2_14plus  i.ageg carehome sex2 i.isoweek if immcomp==1
 
 /*PFIZER DOSES 1 & 2*/
 
 tab tested_syx vax_status_pf1_0to20 if immcomp==1
 logistic  tested_syx vax_status_pf1_0to20 if immcomp==1
-logistic  tested_syx vax_status_pf1_0to20  i.ageg carehome sex2 if immcomp==1 
 logistic  tested_syx vax_status_pf1_0to20  i.ageg carehome sex2 i.isoweek if immcomp==1
 
 tab tested_syx vax_status_pf1_21plus if immcomp==1
 logistic  tested_syx vax_status_pf1_21plus if immcomp==1
-logistic  tested_syx vax_status_pf1_21plus  i.ageg carehome sex2 if immcomp==1
 logistic  tested_syx vax_status_pf1_21plus  i.ageg carehome sex2 i.isoweek if immcomp==1
 
 tab tested_syx vax_status_pf2_0to13 if immcomp==1
 logistic  tested_syx vax_status_pf2_0to13 if immcomp==1
-logistic  tested_syx vax_status_pf2_0to13  i.ageg carehome sex2 if immcomp==1 
 logistic  tested_syx vax_status_pf2_0to13  i.ageg carehome sex2 i.isoweek if immcomp==1 
 
 tab tested_syx vax_status_pf2_14plus if immcomp==1
 logistic  tested_syx vax_status_pf2_14plus if immcomp==1
-logistic  tested_syx vax_status_pf2_14plus  i.ageg carehome sex2 if immcomp==1
 logistic  tested_syx vax_status_pf2_14plus  i.ageg carehome sex2 i.isoweek if immcomp==1
 
 /*AZ DOSES 1 & 2*/
 
 tab tested_syx vax_status_az1_0to20 if immcomp==1
 logistic  tested_syx vax_status_az1_0to20 if immcomp==1
-logistic  tested_syx vax_status_az1_0to20  i.ageg carehome sex2 if immcomp==1
 logistic  tested_syx vax_status_az1_0to20  i.ageg carehome sex2 i.isoweek if immcomp==1
 
 tab tested_syx vax_status_az1_21plus if immcomp==1
 logistic  tested_syx vax_status_az1_21plus if immcomp==1
-logistic  tested_syx vax_status_az1_21plus  i.ageg carehome sex2 if immcomp==1 
 logistic  tested_syx vax_status_az1_21plus  i.ageg carehome sex2 i.isoweek if immcomp==1 
 
 tab tested_syx vax_status_az2_0to13 if immcomp==1
 logistic  tested_syx vax_status_az2_0to13 if immcomp==1
-logistic  tested_syx vax_status_az2_0to13  i.ageg carehome sex2 if immcomp==1
 logistic  tested_syx vax_status_az2_0to13  i.ageg carehome sex2 i.isoweek if immcomp==1
 
 tab tested_syx vax_status_az2_14plus if immcomp==1
 logistic  tested_syx vax_status_az2_14plus if immcomp==1
-logistic  tested_syx vax_status_az2_14plus  i.ageg carehome sex2 if immcomp==1
 logistic  tested_syx vax_status_az2_14plus  i.ageg carehome sex2 i.isoweek if immcomp==1
 
 
@@ -935,6 +922,9 @@ recode vax1prepostest_second_period min/-1=.  /*to exclude -ve numbers ie tested
 
 recode vax1prepostest_second_period 0/max=1
 recode vax1prepostest_second_period 1=. if covid_vax_2_date2<postestdate_second_period2
+
+tab vax1prepostest_second_period tested_syx if timeperiod==2
+
 recode vax1prepostest_second_period 1=. if pos_syx!=1
 
 tab vax1prepostest_second_period
@@ -956,6 +946,8 @@ recode vax1prenegtest_second_period min/-1=.
 
 recode vax1prenegtest_second_period 0/max=1
 recode vax1prenegtest_second_period 1=. if covid_vax_2_date2<negtestdate_second_period2
+
+tab vax1prenegtest_second_period tested_syx if timeperiod==2
 
 recode vax1prenegtest_second_period 1=. if neg_syx!=1
 
@@ -991,6 +983,9 @@ recode vax2prepostest_second_period min/-1=.  /*to exclude -ve numbers ie testes
 
 recode vax2prepostest_second_period 0/max=1
 recode vax2prepostest_second_period 1=. if covid_vax_3_date2<postestdate_second_period2
+
+tab vax2prepostest_second_period tested_syx if timeperiod==2
+
 recode vax2prepostest_second_period 1=. if pos_syx!=1
 
 tab vax2prepostest_second_period
@@ -1014,6 +1009,8 @@ recode vax2prenegtest_second_period min/-1=.
 
 recode vax2prenegtest_second_period 0/max=1
 recode vax2prenegtest_second_period 1=. if covid_vax_3_date2<negtestdate_second_period2
+
+tab vax2prenegtest_second_period tested_syx if timeperiod==2
 
 recode vax2prenegtest_second_period 1=. if neg_syx!=1
 
@@ -1041,7 +1038,7 @@ tab vax2t1_vax_secondperiod
 gen vax2t2_vax_secondperiod=vax2_pos_14plus_second_period
 recode vax2t2_vax_secondperiod .=1 if vax2_neg_14plus_second_period==1
 tab vax2t2_vax_secondperiod
-*********************************************************************************************8
+******************************************************************************************
 ///*** Combine variables for vaccinated pre tested with  unvaccinated pre tested to get VACCINATION STATUS (0==unvaccinated, 1==vaccinated) for each time period ***///
 
 /*ANY covid vaccine*/
@@ -1081,6 +1078,9 @@ recode vax3prepostest_second_period min/-1=.  /*to exclude -ve numbers ie testes
 
 recode vax3prepostest_second_period 0/max=1
 recode vax3prepostest_second_period 1=. if covid_vax_4_date2<postestdate_second_period2
+
+tab vax3prepostest_second_period tested_syx if timeperiod==2
+
 recode vax3prepostest_second_period 1=. if pos_syx!=1
 
 tab vax3prepostest_second_period
@@ -1113,6 +1113,8 @@ recode vax3prenegtest_second_period min/-1=.
 
 recode vax3prenegtest_second_period 0/max=1
 recode vax3prenegtest_second_period 1=. if covid_vax_4_date2<negtestdate_second_period2
+
+tab vax3prenegtest_second_period tested_syx if timeperiod==2
 
 recode vax3prenegtest_second_period 1=. if neg_syx!=1
 
@@ -1170,28 +1172,24 @@ tab vax_status_any3_14plus_secperiod
 
 tab tested_syx vax_status_any3_0to13_secperiod
 logistic  tested_syx vax_status_any3_0to13_secperiod 
-logistic  tested_syx vax_status_any3_0to13_secperiod  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd 
 logistic  tested_syx vax_status_any3_0to13_secperiod  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 tab tested_syx vax_status_any3_14plus_secperiod
 logistic  tested_syx vax_status_any3_14plus_secperiod 
-logistic  tested_syx vax_status_any3_14plus_secperiod  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd 
 logistic  tested_syx vax_status_any3_14plus_secperiod  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 /*Immunocompromised 3rd dose any vaccine*/
 tab tested_syx vax_status_any3_0to13_secperiod if immcomp==1
 logistic  tested_syx vax_status_any3_0to13_secperiod if immcomp==1
-logistic  tested_syx vax_status_any3_0to13_secperiod  i.ageg carehome sex2 if immcomp==1 
 logistic  tested_syx vax_status_any3_0to13_secperiod  i.ageg carehome sex2 i.isoweek if immcomp==1 
 
 tab tested_syx vax_status_any3_14plus_secperiod if immcomp==1
 logistic  tested_syx vax_status_any3_14plus_secperiod if immcomp==1
-logistic  tested_syx vax_status_any3_14plus_secperiod  i.ageg carehome sex2 if immcomp==1
 logistic  tested_syx vax_status_any3_14plus_secperiod  i.ageg carehome sex2 i.isoweek if immcomp==1
 
-***********************************************************************************************************
-//////////////////////THIRD PERIOD 25 Nov 2021 - MARCH 2022///////////////////////////////////////////////////
-*******************************************************************************************************************
+****************************************************************************
+//////////////////////THIRD PERIOD 25 Nov 2021 - MARCH 2022/////////
+****************************************************************************
 
 /***Any first dose vaccine received before a pos or neg test in THIRD period***/
 /*Positive test after dose 1 but before dose 2*/
@@ -1201,6 +1199,9 @@ recode vax1prepostest_third_period min/-1=.  /*to exclude -ve numbers ie tested 
 
 recode vax1prepostest_third_period 0/max=1
 recode vax1prepostest_third_period 1=. if covid_vax_2_date2<postestdate_third_period2
+
+tab vax1prepostest_third_period tested_syx if timeperiod==3
+
 recode vax1prepostest_third_period 1=. if pos_syx!=1
 
 tab vax1prepostest_third_period
@@ -1223,6 +1224,7 @@ recode vax1prenegtest_third_period min/-1=.
 recode vax1prenegtest_third_period 0/max=1
 recode vax1prenegtest_third_period 1=. if covid_vax_2_date2<negtestdate_third_period2
 
+tab vax1prenegtest_third_period tested_syx if timeperiod==3
 recode vax1prenegtest_third_period 1=. if neg_syx!=1
 
 tab vax1prenegtest_third_period
@@ -1257,6 +1259,9 @@ recode vax2prepostest_third_period min/-1=.  /*to exclude -ve numbers ie testesd
 
 recode vax2prepostest_third_period 0/max=1
 recode vax2prepostest_third_period 1=. if covid_vax_3_date2<postestdate_third_period2
+
+tab vax2prepostest_third_period tested_syx if timeperiod==3
+
 recode vax2prepostest_third_period 1=. if pos_syx!=1
 
 tab vax2prepostest_third_period
@@ -1281,6 +1286,7 @@ recode vax2prenegtest_third_period min/-1=.
 recode vax2prenegtest_third_period 0/max=1
 recode vax2prenegtest_third_period 1=. if covid_vax_3_date2<negtestdate_second_period2
 
+tab vax2prenegtest_third_period tested_syx if timeperiod==3
 recode vax2prenegtest_third_period 1=. if neg_syx!=1
 
 tab vax2prenegtest_third_period
@@ -1347,6 +1353,9 @@ recode vax3prepostest_third_period min/-1=.  /*to exclude -ve numbers ie testesd
 
 recode vax3prepostest_third_period 0/max=1
 recode vax3prepostest_third_period 1=. if covid_vax_4_date2<postestdate_third_period2
+
+tab vax3prepostest_third_period tested_syx if timeperiod==3
+
 recode vax3prepostest_third_period 1=. if pos_syx!=1
 
 tab vax3prepostest_third_period
@@ -1370,6 +1379,8 @@ recode vax3prenegtest_third_period min/-1=.
 
 recode vax3prenegtest_third_period 0/max=1
 recode vax3prenegtest_third_period 1=. if covid_vax_4_date2<negtestdate_third_period2
+
+tab vax3prenegtest_third_period tested_syx if timeperiod==3
 
 recode vax3prenegtest_third_period 1=. if neg_syx!=1
 
@@ -1427,23 +1438,19 @@ tab vax_status_any3_14plus_thirdperd
 
 tab tested_syx vax_status_any3_0to13_thirdperd
 logistic  tested_syx vax_status_any3_0to13_thirdperd 
-logistic  tested_syx vax_status_any3_0to13_thirdperd  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd 
 logistic  tested_syx vax_status_any3_0to13_thirdperd  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 tab tested_syx vax_status_any3_14plus_thirdperd
 logistic  tested_syx vax_status_any3_14plus_thirdperd 
-logistic  tested_syx vax_status_any3_14plus_thirdperd  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd 
 logistic  tested_syx vax_status_any3_14plus_thirdperd  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
 
 /*Immunocompromised 3rd dose any vaccine*/
 tab tested_syx vax_status_any3_0to13_thirdperd if immcomp==1
 logistic  tested_syx vax_status_any3_0to13_thirdperd if immcomp==1
-logistic  tested_syx vax_status_any3_0to13_thirdperd  i.ageg carehome sex2 if immcomp==1 
 logistic  tested_syx vax_status_any3_0to13_thirdperd  i.ageg carehome sex2 i.isoweek if immcomp==1 
 
 tab tested_syx vax_status_any3_14plus_thirdperd if immcomp==1
 logistic  tested_syx vax_status_any3_14plus_thirdperd if immcomp==1
-logistic  tested_syx vax_status_any3_14plus_thirdperd  i.ageg carehome sex2 if immcomp==1
 logistic  tested_syx vax_status_any3_14plus_thirdperd  i.ageg carehome sex2 i.isoweek if immcomp==1
 
 log close
