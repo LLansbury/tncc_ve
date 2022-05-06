@@ -82,12 +82,7 @@ recode carehome 1/3=1 .=0
 ///***DEFINE COVID DIAGNOSIS, 1 = positive Covid test, 0 = negative Covid test)***///
 //** Generate a variable for positive test and negative tests (excluding neg tests that are within 3 weeks of a positive test) **//
 
-/******ENSURE ONLY TESTS DONE BETWEEN 01 Jan 2021 and 8 June 2021 are included****/
 
-replace positive_test_1_date2=. if positive_test_1_date2<22281|positive_test_1_date2>22439
-replace negative_test_result_1_date2=. if negative_test_result_1_date2<22281|negative_test_result_1_date2>22439
-
-/*generate a code for negative tests that are within 3 weeks of a positive test*/
 
 
 gen pos=positive_test_1_date2
@@ -289,7 +284,7 @@ tab vax2t2_vax
 
 /* Positive test after dose 1 but before dose 2*/
 
-gen pf1prepositivetest = positive_test_1_date2 - covid_vax_pfizer_1_date2
+gen pf1prepositivetest = postestdate_first_period2 - covid_vax_pfizer_1_date2
 recode pf1prepositivetest min/-1=.  /*to exclude -ve numbers ie testesd before pfizer dose 1) */
 
 recode pf1prepositivetest 0/max=1
@@ -318,7 +313,7 @@ tab pd1_pos_21plus
 
 /* Negative test after dose 1 but before dose 2*/  
 
-gen pf1prenegtest = negative_test_result_1_date2 - covid_vax_pfizer_1_date2
+gen pf1prenegtest = negtestdate_first_period2 - covid_vax_pfizer_1_date2
 recode pf1prenegtest min/-1=. /* to exclude those with a negative test prior to first pfzer dose*/
 
 recode pf1prenegtest 0/max=1
@@ -361,7 +356,7 @@ tab pd1t2_vax
 
 /* Positive test after dose 2 but before dose 3 of ANY Covid vaccine*/
 
-gen pf2prepositivetest = positive_test_1_date2 - covid_vax_pfizer_2_date2
+gen pf2prepositivetest = postestdate_first_period2 - covid_vax_pfizer_2_date2
 recode pf2prepositivetest min/-1=.  /*to exclude -ve numbers ie tested before pfizer dose 2) */
 
 
@@ -390,7 +385,7 @@ tab pd2_pos_14plus
 
 /* Negative test after dose 2 but before dose 3 of any vaccine*/  
 
-gen pf2prenegtest = negative_test_result_1_date2 - covid_vax_pfizer_2_date2
+gen pf2prenegtest = negtestdate_first_period2 - covid_vax_pfizer_2_date2
 recode pf2prenegtest min/-1=. /* to exclude those with a negative test prior to second pfzer dose*/
 
 recode pf2prenegtest 0/max=1
@@ -436,7 +431,7 @@ tab pd2t2_vax
 
 /* Positive test after dose 1 but not after dose 2*/
 
-gen az1prepositivetest = positive_test_1_date2 - covid_vax_az_1_date2
+gen az1prepositivetest = postestdate_first_period2 - covid_vax_az_1_date2
 recode az1prepositivetest min/-1=.  /*to exclude -ve numbers ie testesd before AZ dose 1) */
 
 
@@ -465,7 +460,7 @@ tab az1_pos_21plus
 
 /* Negative test after dose 1 but before dose 2*/  
 
-gen az1prenegtest = negative_test_result_1_date2 - covid_vax_az_1_date2
+gen az1prenegtest = negtestdate_first_period2 - covid_vax_az_1_date2
 recode az1prenegtest min/-1=. /* to exclude those with a negative test prior to first az dose*/
 
 recode az1prenegtest 0/max=1
@@ -514,7 +509,7 @@ tab az1t2_vax
 
 /* Positive test after dose 2 but before dose 3 of any vaccine*/
 
-gen az2prepositivetest = positive_test_1_date2 - covid_vax_az_2_date2
+gen az2prepositivetest = postestdate_first_period2 - covid_vax_az_2_date2
 recode az2prepositivetest min/-1=.  /*to exclude -ve numbers ie tested before az dose 2) */
 
 
@@ -542,7 +537,7 @@ tab az2_pos_14plus
 
 /* Negative test after dose 2 but before dose 3*/  
 
-gen az2prenegtest = negative_test_result_1_date2 - covid_vax_az_2_date2
+gen az2prenegtest = negtestdate_first_period2 - covid_vax_az_2_date2
 recode az2prenegtest min/-1=. /* to exclude those with a negative test prior to second AZ dose*/
 
 recode az2prenegtest 0/max=1
@@ -917,6 +912,8 @@ logistic  tested_syx vax_status_az2_14plus  i.ageg carehome sex2 i.isoweek if im
 /***Any first dose vaccine received before a pos or neg test in SECOND period***/
 /*Positive test after dose 1 but before dose 2*/
 
+tab tested_syx if timeperiod==2
+
 gen vax1prepostest_second_period=postestdate_second_period2-covid_vax_1_date2
 recode vax1prepostest_second_period min/-1=.  /*to exclude -ve numbers ie tested before any dose 1) */
 
@@ -1190,7 +1187,7 @@ logistic  tested_syx vax_status_any3_14plus_secperiod  i.ageg carehome sex2 i.is
 ****************************************************************************
 //////////////////////THIRD PERIOD 25 Nov 2021 - MARCH 2022/////////
 ****************************************************************************
-
+tab tested_syx if time_period==3
 /***Any first dose vaccine received before a pos or neg test in THIRD period***/
 /*Positive test after dose 1 but before dose 2*/
 
