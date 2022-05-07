@@ -1187,7 +1187,7 @@ logistic  tested_syx vax_status_any3_14plus_secperiod  i.ageg carehome sex2 i.is
 ****************************************************************************
 //////////////////////THIRD PERIOD 25 Nov 2021 - MARCH 2022/////////
 ****************************************************************************
-tab tested_syx if time_period==3
+tab tested_syx if timeperiod==3
 /***Any first dose vaccine received before a pos or neg test in THIRD period***/
 /*Positive test after dose 1 but before dose 2*/
 
