@@ -69,6 +69,13 @@ tab postestdate_third_period2
 replace negtestdate_third_period2=. if negative_test_result_1_date2<22609|negative_test_result_1_date2>22719
 tab negtestdate_third_period2
 
+/*gen numbered time periods 1 to 3*/
+
+gen timeperiod=.
+replace timeperiod=1 if postestdate_first_period2!=.|negtestdate_first_period2!=.
+replace timeperiod=2 if postestdate_second_period2!=.|negtestdate_second_period2!=.
+replace timeperiod=3 if postestdate_third_period2!=.|negtestdate_third_period2!=.
+
 local string "bmi sex stp region care_home_type"
 
 foreach var of local string {
@@ -148,6 +155,9 @@ tab tested_syx
 /*Positive test after dose 1 but before dose 2*/
 
 gen vax1prepostest_first_period=postestdate_first_period2-covid_vax_1_date2
+
+replace vax1prepostest_first_period=. if timeperiod!=1
+
 recode vax1prepostest_first_period min/-1=.  /*to exclude -ve numbers ie testesd before pfizer dose 1) */
 
 recode vax1prepostest_first_period 0/max=1
@@ -174,6 +184,9 @@ tab vax1_pos_21plus_first_period
 /*Negative test after dose 1 but before dose 2*/
 
 gen vax1prenegtest_first_period=negtestdate_first_period2-covid_vax_1_date2
+
+replace vax1prenegtest_first_period=. if timeperiod!=1
+
 recode vax1prenegtest_first_period min/-1=.
 
 recode vax1prenegtest_first_period 0/max=1
@@ -214,6 +227,9 @@ tab vax1t2_vax
 //**Generate a variable for people vaccinated with any vaccine DOSE 2 prior to the test date during the FIRST PERIOD Jan to Jun**//
 
 gen vax2prepostest_first_period=postestdate_first_period2-covid_vax_2_date2
+
+replace vax2prepostest_first_period=. if timeperiod!=1
+
 recode vax2prepostest_first_period min/-1=.  /*to exclude -ve numbers ie testesd before dose 2 ) */
 
 recode vax2prepostest_first_period 0/max=1
@@ -242,6 +258,9 @@ tab vax2_pos_14plus_first_period
 /*Negative test after dose 2 but before dose 3*/
 
 gen vax2prenegtest_first_period=negtestdate_first_period2-covid_vax_2_date2
+
+replace vax2prenegtest_first_period=. if timeperiod!=1
+
 recode vax2prenegtest_first_period min/-1=.
 
 recode vax2prenegtest_first_period 0/max=1
@@ -585,16 +604,14 @@ tab az2t2_vax
 gen vax1recd=1
 recode vax1recd 1=. if covid_vax_1_date2==.
 
-//**create var to identify people with no record of first dose of ANY Covid vaccine, or had it after testerd, and who were symtpomatic**//
+//**create var to identify people with no record of first dose of ANY Covid vaccine, or had it after tested, and who were symtpomatic during first time period**//
 
-gen unvax_any_pretest=.
-recode unvax_any_pretest .=1 if vax1recd!=1
-recode unvax_any_pretest .=1 if covid_vax_1_date2>positive_test_1_date2 & vax1recd==1
-recode unvax_any_pretest .=1 if covid_vax_1_date2>negative_test_result_1_date2 & vax1recd==1
-
-recode unvax_any_pretest 1=. if tested_syx==.
-
-tab unvax_any_pretest
+gen unvax_any_pretest_p1=.
+recode unvax_any_pretest_p1 .=1 if vax1recd!=1 & timeperiod==1
+recode unvax_any_pretest_p1 .=1 if covid_vax_1_date2>postestdate_first_period2 & vax1recd==1 & timeperiod==1
+recode unvax_any_pretest_p1 .=1 if covid_vax_1_date2>negtestdate_first_period2 & vax1recd==1 & timeperiod==1
+recode unvax_any_pretest_p1 1=. if tested_syx==. & timeperiod==1
+tab unvax_any_pretest_p1
 
 //**generate a variable for receipt of first dose of either Pf or AZ at anytime**//
 
@@ -610,16 +627,16 @@ recode az1recd 1=. if covid_vax_az_1_date2==.
 
 gen unvacpretest=.
 
-recode unvacpretest .=1 if pf1recd!=1 & az1recd!=1 /*(no record of ever having first dose of either Pf or AZ. I THINK IT does need to be '&' here, not '|'; if it is 'OR', people who have a record of first dose of either vaccine will be counted as  unvaccinated, which will not be correct)*/
+recode unvacpretest .=1 if pf1recd!=1 & az1recd!=1 & timeperiod==1/*(no record of ever having first dose of either Pf or AZ.*/
 
 /*change to unvaccinated if had positive/negative result prior to first vaccine dose*/
 
-recode unvacpretest .=1 if covid_vax_pfizer_1_date2>positive_test_1_date2 & pf1recd==1 
-recode unvacpretest .=1 if covid_vax_az_1_date2>positive_test_1_date2 & az1recd==1
-recode unvacpretest .=1 if covid_vax_pfizer_1_date2>negative_test_result_1_date2 & pf1recd==1
-recode unvacpretest .=1 if covid_vax_az_1_date2>negative_test_result_1_date2 & az1recd==1
+recode unvacpretest .=1 if covid_vax_pfizer_1_date2>postestdate_first_period2 & pf1recd==1 & timeperiod==1
+recode unvacpretest .=1 if covid_vax_az_1_date2>positive_test_1_date2 & az1recd==1 & timeperiod==1
+recode unvacpretest .=1 if covid_vax_pfizer_1_date2>negative_test_result_1_date2 & pf1recd==1 & timeperiod==1
+recode unvacpretest .=1 if covid_vax_az_1_date2>negative_test_result_1_date2 & az1recd==1 & timeperiod==1
 
-recode unvacpretest 1=. if tested_syx==.
+recode unvacpretest 1=. if tested_syx==. & timeperiod==1
 
 tab unvacpretest  
 
@@ -628,11 +645,11 @@ tab unvacpretest
 /*ANY covid vaccine*/
 
 gen vax_status_any1_0to20=vax1t1_vax
-recode vax_status_any1_0to20 .=0 if unvax_any_pretest==1
+recode vax_status_any1_0to20 .=0 if unvax_any_pretest_p1==1 & timeperiod==1
 tab vax_status_any1_0to20
 
 gen vax_status_any1_21plus=vax1t2_vax
-recode vax_status_any1_21plus .=0 if unvax_any_pretest==1
+recode vax_status_any1_21plus .=0 if unvax_any_pretest_p1==1 & timeperiod==1
 
 
 //***ADDITIONAL CODE SO PEOPLE WHO WERE VACCINATED AND HAD TEST RESULT IN TIME PERIOD 1 ARE NOT STILL COUNTED AS UNVACCINATED IN THE LATER TIME PERIOD ***///
@@ -642,14 +659,14 @@ recode vax_status_any1_21plus 1=. if vax_status_any1_0to20==1
 tab vax_status_any1_21plus
 
 gen vax_status_any2_0to13=vax2t1_vax
-recode vax_status_any2_0to13 .=0 if unvax_any_pretest==1
+recode vax_status_any2_0to13 .=0 if unvax_any_pretest_p1==1
 
 recode vax_status_any2_0to13 0=. if vax_status_any1_0to20==1|vax_status_any1_21plus==1
 recode vax_status_any2_0to13 1=. if vax_status_any1_0to20==1|vax_status_any1_21plus==1
 tab vax_status_any2_0to13
 
 gen vax_status_any2_14plus=vax2t2_vax
-recode vax_status_any2_14plus .=0 if unvax_any_pretest==1
+recode vax_status_any2_14plus .=0 if unvax_any_pretest_p1==1
 
 recode vax_status_any2_14plus 0=. if vax_status_any1_0to20==1|vax_status_any1_21plus==1|vax_status_any2_0to13==1
 recode vax_status_any2_14plus 1=. if vax_status_any1_0to20==1|vax_status_any1_21plus==1|vax_status_any2_0to13==1
@@ -783,12 +800,7 @@ gen ISOweekneg =int((doy(7*int((negative_test_result_1_date2-mdy(1,1,1900))/7)+ 
 gen isoweek=ISOweekpos
 replace isoweek=ISOweekneg if isoweek==.
 
-/*gen numbered time periods 1 to 3*/
 
-gen timeperiod=.
-replace timeperiod=1 if postestdate_first_period2!=.|negtestdate_first_period2!=.
-replace timeperiod=2 if postestdate_second_period2!=.|negtestdate_second_period2!=.
-replace timeperiod=3 if postestdate_third_period2!=.|negtestdate_third_period2!=.
 
 /*tab to check if reporting of symptoms differs between the tike periods (tested_syx : 0 = neg test but symptoms; 1= pos test with symtpoms)*/
 
@@ -915,6 +927,9 @@ logistic  tested_syx vax_status_az2_14plus  i.ageg carehome sex2 i.isoweek if im
 tab tested_syx if timeperiod==2
 
 gen vax1prepostest_second_period=postestdate_second_period2-covid_vax_1_date2
+
+replace vax1prepostest_second_period=. if timeperiod!=2
+
 recode vax1prepostest_second_period min/-1=.  /*to exclude -ve numbers ie tested before any dose 1) */
 
 recode vax1prepostest_second_period 0/max=1
@@ -939,6 +954,9 @@ tab vax1_pos_21plus_second_period
 /*Negative test after dose 1 but before dose 2*/
 
 gen vax1prenegtest_second_period=negtestdate_second_period2-covid_vax_1_date2
+
+replace vax1prenegtest_second_period=. if timeperiod!=2
+
 recode vax1prenegtest_second_period min/-1=.
 
 recode vax1prenegtest_second_period 0/max=1
@@ -976,7 +994,10 @@ tab vax1t2_vax_secondperiod
 //**Generate a variable for people vaccinated with any vaccine DOSE 2 prior to the test date during the FIRST PERIOD Jan to Jun**//
 
 gen vax2prepostest_second_period=postestdate_second_period2-covid_vax_2_date2
-recode vax2prepostest_second_period min/-1=.  /*to exclude -ve numbers ie testesd before dose 2 ) */
+
+replace vax2prepostest_second_period=. if timeperiod!=2
+
+recode vax2prepostest_second_period min/-1=.  /*to exclude -ve numbers ie tested before dose 2 ) */
 
 recode vax2prepostest_second_period 0/max=1
 recode vax2prepostest_second_period 1=. if covid_vax_3_date2<postestdate_second_period2
@@ -1002,6 +1023,9 @@ tab vax2_pos_14plus_second_period
 /*Negative test after dose 2 but before dose 3*/
 
 gen vax2prenegtest_second_period=negtestdate_second_period2-covid_vax_2_date2
+
+replace vax2prenegtest_second_period=. if timeperiod!=2
+
 recode vax2prenegtest_second_period min/-1=.
 
 recode vax2prenegtest_second_period 0/max=1
@@ -1036,16 +1060,25 @@ gen vax2t2_vax_secondperiod=vax2_pos_14plus_second_period
 recode vax2t2_vax_secondperiod .=1 if vax2_neg_14plus_second_period==1
 tab vax2t2_vax_secondperiod
 ******************************************************************************************
+//**create var to identify people with no record of first dose of ANY Covid vaccine, or had it after tested, and who were symtpomatic during second timeperiod**//
+
+gen unvax_any_pretest_p2=.
+recode unvax_any_pretest_p2 .=1 if vax1recd!=1 & timeperiod==2
+recode unvax_any_pretest_p2 .=1 if covid_vax_1_date2>postestdate_second_period2 & vax1recd==1 & timeperiod==2
+recode unvax_any_pretest_p2 .=1 if covid_vax_1_date2>negtestdate_second_period2 & vax1recd==1 & timeperiod==2
+recode unvax_any_pretest_p2 1=. if tested_syx==. & timeperiod==2
+tab unvax_any_pretest_p2
+
 ///*** Combine variables for vaccinated pre tested with  unvaccinated pre tested to get VACCINATION STATUS (0==unvaccinated, 1==vaccinated) for each time period ***///
 
 /*ANY covid vaccine*/
 
 gen vax_status_any1_0to20_secperiod=vax1t1_vax_secondperiod
-recode vax_status_any1_0to20_secperiod .=0 if unvax_any_pretest==1
+recode vax_status_any1_0to20_secperiod .=0 if unvax_any_pretest_p2==1
 tab vax_status_any1_0to20_secperiod
 
 gen vax_status_any1_21plus_secperiod=vax1t2_vax_secondperiod
-recode vax_status_any1_21plus_secperiod .=0 if unvax_any_pretest==1
+recode vax_status_any1_21plus_secperiod .=0 if unvax_any_pretest_p2==1
 
 
 //***ADDITIONAL CODE SO PEOPLE WHO WERE VACCINATED AND HAD TEST RESULT IN TIME PERIOD 1 ARE NOT STILL COUNTED AS UNVACCINATED IN THE LATER TIME PERIOD ***///
@@ -1055,14 +1088,14 @@ recode vax_status_any1_21plus_secperiod 1=. if vax_status_any1_0to20_secperiod==
 tab vax_status_any1_21plus_secperiod
 
 gen vax_status_any2_0to13_secperiod=vax2t1_vax_secondperiod
-recode vax_status_any2_0to13_secperiod .=0 if unvax_any_pretest==1
+recode vax_status_any2_0to13_secperiod .=0 if unvax_any_pretest_p2==1
 
 recode vax_status_any2_0to13_secperiod 0=. if vax_status_any1_0to20_secperiod==1|vax_status_any1_21plus_secperiod==1
 recode vax_status_any2_0to13_secperiod 1=. if vax_status_any1_0to20_secperiod==1|vax_status_any1_21plus_secperiod==1
 tab vax_status_any2_0to13_secperiod
 
 gen vax_status_any2_14plus_secperiod=vax2t2_vax_secondperiod
-recode vax_status_any2_14plus_secperiod .=0 if unvax_any_pretest==1
+recode vax_status_any2_14plus_secperiod .=0 if unvax_any_pretest_p2==1
 
 recode vax_status_any2_14plus_secperiod 0=. if vax_status_any1_0to20_secperiod==1|vax_status_any1_21plus_secperiod==1|vax_status_any2_0to13_secperiod==1
 recode vax_status_any2_14plus_secperiod 1=. if vax_status_any1_0to20_secperiod==1|vax_status_any1_21plus_secperiod==1|vax_status_any2_0to13_secperiod==1
@@ -1071,7 +1104,10 @@ tab vax_status_any2_14plus_secperiod
 //**THIRD DOSE ANY VACCINE**//
 
 gen vax3prepostest_second_period=postestdate_second_period2-covid_vax_3_date2
-recode vax3prepostest_second_period min/-1=.  /*to exclude -ve numbers ie testesd before dose 3 ) */
+
+replace vax3prepostest_second_period=. if timeperiod!=2
+
+recode vax3prepostest_second_period min/-1=.  /*to exclude -ve numbers ie tested before dose 3 ) */
 
 recode vax3prepostest_second_period 0/max=1
 recode vax3prepostest_second_period 1=. if covid_vax_4_date2<postestdate_second_period2
@@ -1084,7 +1120,7 @@ tab vax3prepostest_second_period
 
 ******************************************************************************8
 
-/*Two different time periods for pos test after dose 2 - SECOND period*/
+/*Two different time periods for pos test after dose 3 - SECOND period*/
 
 gen timepos_vax3=positive_test_1_date2-covid_vax_3_date2
 recode timepos_vax3 min/-1=.
@@ -1099,13 +1135,16 @@ gen vax3_pos_14plus_second_period=vax3prepostest_second_period
 recode vax3_pos_14plus_second_period 1=. if timepos_vax3==1
 tab vax3_pos_14plus_second_period
 
-/*Negative test after dose 1 but before dose 2*/
+
 gen timeneg_vax3=negative_test_result_1_date2-covid_vax_3_date2
 recode timeneg_vax3 min/-1=.
 recode timeneg_vax3 0/13 =1
 recode timeneg_vax3 14/max=2
 
 gen vax3prenegtest_second_period=negtestdate_second_period2-covid_vax_3_date2
+
+replace vax3prenegtest_second_period=. if timeperiod!=2
+
 recode vax3prenegtest_second_period min/-1=.
 
 recode vax3prenegtest_second_period 0/max=1
@@ -1147,7 +1186,7 @@ tab vax3t2_vax_secondperiod
 
 gen vax_status_any3_0to13_secperiod=vax3t1_vax_secondperiod
 
-recode vax_status_any3_0to13_secperiod .=0 if unvax_any_pretest==1
+recode vax_status_any3_0to13_secperiod .=0 if unvax_any_pretest_p2==1
 recode vax_status_any3_0to13_secperiod 0=. if vax_status_any2_0to13_secperiod==1|vax_status_any2_14plus_secperiod==1|vax_status_any1_0to20_secperiod==1|vax_status_any1_21plus_secperiod==1
 recode vax_status_any3_0to13_secperiod 1=. if vax_status_any2_0to13_secperiod==1|vax_status_any2_14plus_secperiod==1|vax_status_any1_0to20_secperiod==1|vax_status_any1_21plus_secperiod==1
 tab vax_status_any3_0to13_secperiod
@@ -1155,7 +1194,7 @@ tab vax_status_any3_0to13_secperiod
 /*Dose 3, 14 days + (t2)*/
 
 gen vax_status_any3_14plus_secperiod=vax3t2_vax_secondperiod
-recode vax_status_any3_14plus_secperiod .=0 if unvax_any_pretest==1
+recode vax_status_any3_14plus_secperiod .=0 if unvax_any_pretest_p2==1
 
 recode vax_status_any3_14plus_secperiod 0=. if vax_status_any3_0to13_secperiod==1|vax_status_any2_0to13_secperiod==1|vax_status_any2_14plus_secperiod==1|vax_status_any1_0to20_secperiod==1|vax_status_any1_21plus_secperiod==1
 recode vax_status_any3_14plus_secperiod 1=. if vax_status_any3_0to13_secperiod==1|vax_status_any2_0to13_secperiod==1|vax_status_any2_14plus_secperiod==1|vax_status_any1_0to20_secperiod==1|vax_status_any1_21plus_secperiod==1
@@ -1164,6 +1203,44 @@ tab vax_status_any3_14plus_secperiod
 
 
 //**CROSS TABS AND OVERALL unadjusted and adjusted ORs, including separate model with adjustment for test week**//
+
+/*ANY COVID VACCINE DOSE 1 FOR SECOND PERIOD JUN TO NOV*/
+
+tab tested_syx vax_status_any1_0to20_secperiod
+logistic  tested_syx vax_status_any1_0to20_secperiod 
+logistic  tested_syx vax_status_any1_0to20_secperiod  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
+
+tab tested_syx vax_status_any1_21plus_secperiod
+logistic  tested_syx vax_status_any1_21plus_secperiod 
+logistic  tested_syx vax_status_any1_21plus_secperiod  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
+
+/*Immunocompromised 1ST dose any vaccine second period*/
+tab tested_syx vax_status_any1_0to20_secperiod if immcomp==1
+logistic  tested_syx vax_status_any1_0to20_secperiod if immcomp==1
+logistic  tested_syx vax_status_any1_0to20_secperiod  i.ageg carehome sex2 i.isoweek if immcomp==1 
+
+tab tested_syx vax_status_any1_21plus_secperiod if immcomp==1
+logistic  tested_syx vax_status_any1_21plus_secperiod if immcomp==1
+logistic  tested_syx vax_status_any1_21plus_secperiod  i.ageg carehome sex2 i.isoweek if immcomp==1
+
+/*ANY COVID VACCINE DOSE 2 for second period*/
+
+tab tested_syx vax_status_any2_0to13_secperiod
+logistic  tested_syx vax_status_any2_0to13_secperiod 
+logistic  tested_syx vax_status_any2_0to13_secperiod  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
+
+tab tested_syx vax_status_any2_14plus_secperiod
+logistic  tested_syx vax_status_any2_14plus_secperiod 
+logistic  tested_syx vax_status_any2_14plus_secperiod  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
+
+/*Immunocompromised 2nd dose any vaccine second period*/
+tab tested_syx vax_status_any2_0to13_secperiod if immcomp==1
+logistic  tested_syx vax_status_any2_0to13_secperiod if immcomp==1
+logistic  tested_syx vax_status_any2_0to13_secperiod  i.ageg carehome sex2 i.isoweek if immcomp==1 
+
+tab tested_syx vax_status_any2_14plus_secperiod if immcomp==1
+logistic  tested_syx vax_status_any2_14plus_secperiod if immcomp==1
+logistic  tested_syx vax_status_any2_14plus_secperiod  i.ageg carehome sex2 i.isoweek if immcomp==1
 
 /*ANY COVID VACCINE DOSE 3 FOR SECOND PERIOD JUN TO  NOV 2021*/
 
@@ -1192,6 +1269,9 @@ tab tested_syx if timeperiod==3
 /*Positive test after dose 1 but before dose 2*/
 
 gen vax1prepostest_third_period=postestdate_third_period2-covid_vax_1_date2
+
+replace vax1prepostest_third_period=. if timeperiod!=3
+
 recode vax1prepostest_third_period min/-1=.  /*to exclude -ve numbers ie tested before any dose 1) */
 
 recode vax1prepostest_third_period 0/max=1
@@ -1216,6 +1296,8 @@ tab vax1_pos_21plus_third_period
 /*Negative test after dose 1 but before dose 2*/
 
 gen vax1prenegtest_third_period=negtestdate_third_period2-covid_vax_1_date2
+
+replace vax1prenegtest_third_period=. if timeperiod!=3
 recode vax1prenegtest_third_period min/-1=.
 
 recode vax1prenegtest_third_period 0/max=1
@@ -1252,6 +1334,9 @@ tab vax1t2_vax_thirdperiod
 //**Generate a variable for people vaccinated with any vaccine DOSE 2 prior to the test date during the FIRST PERIOD Jan to Jun**//
 
 gen vax2prepostest_third_period=postestdate_third_period2-covid_vax_2_date2
+
+replace vax2prepostest_third_period=. if timeperiod!=3
+
 recode vax2prepostest_third_period min/-1=.  /*to exclude -ve numbers ie testesd before dose 2 ) */
 
 recode vax2prepostest_third_period 0/max=1
@@ -1265,7 +1350,7 @@ tab vax2prepostest_third_period
 
 ******************************************************************************8
 
-/*Two different time periods for pos test after dose 2 - SECOND period*/
+/*Two different time periods for pos test after dose 2 - THIRD period*/
 
 gen vax2_pos_0to13_third_period=vax2prepostest_third_period
 recode vax2_pos_0to13_third_period 1=. if timepos_vax2==2
@@ -1278,6 +1363,9 @@ tab vax2_pos_14plus_third_period
 /*Negative test after dose 2 but before dose 3*/
 
 gen vax2prenegtest_third_period=negtestdate_third_period2-covid_vax_2_date2
+
+replace vax2prenegtest_third_period=. if timeperiod!=3
+
 recode vax2prenegtest_third_period min/-1=.
 
 recode vax2prenegtest_third_period 0/max=1
@@ -1310,17 +1398,26 @@ tab vax2t1_vax_thirdperiod
 gen vax2t2_vax_thirdperiod=vax2_pos_14plus_third_period
 recode vax2t2_vax_thirdperiod .=1 if vax2_neg_14plus_third_period==1
 tab vax2t2_vax_thirdperiod
+
+//**create var to identify people with no record of first dose of ANY Covid vaccine, or had it after testerd, and who were symtpomatic during third timeperiod**//
+
+gen unvax_any_pretest_p3=.
+recode unvax_any_pretest_p3 .=1 if vax1recd!=1 & timeperiod==3
+recode unvax_any_pretest_p3 .=1 if covid_vax_1_date2>postestdate_third_period2 & vax1recd==1 & timeperiod==3
+recode unvax_any_pretest_p3 .=1 if covid_vax_1_date2>negtestdate_third_period2 & vax1recd==1 & timeperiod==3
+recode unvax_any_pretest_p3 1=. if tested_syx==. & timeperiod==3
+tab unvax_any_pretest_p3
 *********************************************************************************************8
 ///*** Combine variables for vaccinated pre tested with  unvaccinated pre tested to get VACCINATION STATUS (0==unvaccinated, 1==vaccinated) for each time period ***///
 
 /*ANY covid vaccine*/
 
 gen vax_status_any1_0to20_thirdperd=vax1t1_vax_thirdperiod
-recode vax_status_any1_0to20_thirdperd .=0 if unvax_any_pretest==1
+recode vax_status_any1_0to20_thirdperd .=0 if unvax_any_pretest_p3==1
 tab vax_status_any1_0to20_thirdperd
 
 gen vax_status_any1_21plus_thirdperd=vax1t2_vax_thirdperiod
-recode vax_status_any1_21plus_thirdperd .=0 if unvax_any_pretest==1
+recode vax_status_any1_21plus_thirdperd .=0 if unvax_any_pretest_p3==1
 
 
 //***ADDITIONAL CODE SO PEOPLE WHO WERE VACCINATED AND HAD TEST RESULT IN TIME PERIOD 1 ARE NOT STILL COUNTED AS UNVACCINATED IN THE LATER TIME PERIOD ***///
@@ -1330,14 +1427,14 @@ recode vax_status_any1_21plus_thirdperd 1=. if vax_status_any1_0to20_thirdperd==
 tab vax_status_any1_21plus_thirdperd
 
 gen vax_status_any2_0to13_thirdperd=vax2t1_vax_thirdperiod
-recode vax_status_any2_0to13_thirdperd .=0 if unvax_any_pretest==1
+recode vax_status_any2_0to13_thirdperd .=0 if unvax_any_pretest_p3==1
 
 recode vax_status_any2_0to13_thirdperd 0=. if vax_status_any1_0to20_thirdperd==1|vax_status_any1_21plus_thirdperd==1
 recode vax_status_any2_0to13_thirdperd 1=. if vax_status_any1_0to20_thirdperd==1|vax_status_any1_21plus_thirdperd==1
 tab vax_status_any2_0to13_thirdperd
 
 gen vax_status_any2_14plus_thirdperd=vax2t2_vax_thirdperiod
-recode vax_status_any2_14plus_thirdperd .=0 if unvax_any_pretest==1
+recode vax_status_any2_14plus_thirdperd .=0 if unvax_any_pretest_p3==1
 
 recode vax_status_any2_14plus_thirdperd 0=. if vax_status_any1_0to20_thirdperd==1|vax_status_any1_21plus_thirdperd==1|vax_status_any2_0to13_thirdperd==1
 recode vax_status_any2_14plus_thirdperd 1=. if vax_status_any1_0to20_thirdperd==1|vax_status_any1_21plus_thirdperd==1|vax_status_any2_0to13_thirdperd==1
@@ -1346,6 +1443,9 @@ tab vax_status_any2_14plus_thirdperd
 //**THIRD DOSE ANY VACCINE**//
 
 gen vax3prepostest_third_period=postestdate_third_period2-covid_vax_3_date2
+
+replace vax3prepostest_third_period=. if timeperiod!=3
+
 recode vax3prepostest_third_period min/-1=.  /*to exclude -ve numbers ie testesd before dose 3 ) */
 
 recode vax3prepostest_third_period 0/max=1
@@ -1372,6 +1472,9 @@ tab vax3_pos_14plus_third_period
 /*Negative test after dose 3 but before dose 4*/
 
 gen vax3prenegtest_third_period=negtestdate_third_period2-covid_vax_3_date2
+
+replace vax3prenegtest_third_period if timeperiod!=3
+
 recode vax3prenegtest_third_period min/-1=.
 
 recode vax3prenegtest_third_period 0/max=1
@@ -1413,7 +1516,7 @@ tab vax3t2_vax_thirdperiod
 
 gen vax_status_any3_0to13_thirdperd=vax3t1_vax_thirdperiod
 
-recode vax_status_any3_0to13_thirdperd .=0 if unvax_any_pretest==1
+recode vax_status_any3_0to13_thirdperd .=0 if unvax_any_pretest_p3==1
 recode vax_status_any3_0to13_thirdperd 0=. if vax_status_any2_0to13_thirdperd==1|vax_status_any2_14plus_thirdperd==1|vax_status_any1_0to20_thirdperd==1|vax_status_any1_21plus_thirdperd==1
 recode vax_status_any3_0to13_thirdperd 1=. if vax_status_any2_0to13_thirdperd==1|vax_status_any2_14plus_thirdperd==1|vax_status_any1_0to20_thirdperd==1|vax_status_any1_21plus_thirdperd==1
 tab vax_status_any3_0to13_thirdperd
@@ -1421,7 +1524,7 @@ tab vax_status_any3_0to13_thirdperd
 /*Dose 3, 14 days + (t2)*/
 
 gen vax_status_any3_14plus_thirdperd=vax3t2_vax_thirdperiod
-recode vax_status_any3_14plus_thirdperd .=0 if unvax_any_pretest==1
+recode vax_status_any3_14plus_thirdperd .=0 if unvax_any_pretest_p3==1
 
 recode vax_status_any3_14plus_thirdperd 0=. if vax_status_any3_0to13_thirdperd==1|vax_status_any2_0to13_thirdperd==1|vax_status_any2_14plus_thirdperd==1|vax_status_any1_0to20_thirdperd==1|vax_status_any1_21plus_thirdperd==1
 recode vax_status_any3_14plus_thirdperd 1=. if vax_status_any3_0to13_thirdperd==1|vax_status_any2_0to13_thirdperd==1|vax_status_any2_14plus_thirdperd==1|vax_status_any1_0to20_thirdperd==1|vax_status_any1_21plus_thirdperd==1
@@ -1431,7 +1534,27 @@ tab vax_status_any3_14plus_thirdperd
 
 //**CROSS TABS AND OVERALL unadjusted and adjusted ORs, including separate model with adjustment for test week**//
 
-/*ANY COVID VACCINE DOSE 3 FOR SECOND PERIOD NOV 2021 to MARCH 2022*/
+/*ANY COVID VACCINE DOSE 1 FOR third PERIOD NOV 2021 to MARCH 2022*/
+
+tab tested_syx vax_status_any1_0to20_thirdperd
+logistic  tested_syx vax_status_any1_0to20_thirdperd 
+logistic  tested_syx vax_status_any1_0to20_thirdperd  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
+
+tab tested_syx vax_status_any1_21plus_thirdperd
+logistic  tested_syx vax_status_any1_21plus_thirdperd 
+logistic  tested_syx vax_status_any1_21plus_thirdperd  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
+
+/*ANY COVID VACCINE DOSE 2 FOR THIRD PERIOD NOV 2021 to MARCH 2022*/
+
+tab tested_syx vax_status_any2_0to13_thirdperd
+logistic  tested_syx vax_status_any2_0to13_thirdperd 
+logistic  tested_syx vax_status_any2_0to13_thirdperd  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
+
+tab tested_syx vax_status_any2_14plus_thirdperd
+logistic  tested_syx vax_status_any2_14plus_thirdperd 
+logistic  tested_syx vax_status_any2_14plus_thirdperd  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
+
+/*ANY COVID VACCINE DOSE 3 FOR THIRD PERIOD NOV 2021 to MARCH 2022*/
 
 tab tested_syx vax_status_any3_0to13_thirdperd
 logistic  tested_syx vax_status_any3_0to13_thirdperd 
@@ -1440,6 +1563,27 @@ logistic  tested_syx vax_status_any3_0to13_thirdperd  i.ageg sex2 carehome bmi2 
 tab tested_syx vax_status_any3_14plus_thirdperd
 logistic  tested_syx vax_status_any3_14plus_thirdperd 
 logistic  tested_syx vax_status_any3_14plus_thirdperd  i.ageg sex2 carehome bmi2 i.ethnicity i.region2 i.imd i.isoweek
+
+
+/*IMMUNOCOMPROMISED unadjusted and adjusted ORs*/
+/*Immunocompromised 1st dose any vaccine third period*/
+tab tested_syx vax_status_any1_0to20_thirdperd if immcomp==1
+logistic  tested_syx vax_status_any1_0to20_thirdperd if immcomp==1
+logistic  tested_syx vax_status_any1_0to20_thirdperd  i.ageg carehome sex2 i.isoweek if immcomp==1 
+
+tab tested_syx vax_status_any1_21plus_thirdperd if immcomp==1
+logistic  tested_syx vax_status_any1_21plus_thirdperd if immcomp==1
+logistic  tested_syx vax_status_any1_21plus_thirdperd  i.ageg carehome sex2 i.isoweek if immcomp==1
+
+
+/*Immunocompromised 2nd dose any vaccine third period*/
+tab tested_syx vax_status_any2_0to13_thirdperd if immcomp==1
+logistic  tested_syx vax_status_any2_0to13_thirdperd if immcomp==1
+logistic  tested_syx vax_status_any2_0to13_thirdperd  i.ageg carehome sex2 i.isoweek if immcomp==1 
+
+tab tested_syx vax_status_any2_14plus_thirdperd if immcomp==1
+logistic  tested_syx vax_status_any2_14plus_thirdperd if immcomp==1
+logistic  tested_syx vax_status_any2_14plus_thirdperd  i.ageg carehome sex2 i.isoweek if immcomp==1
 
 /*Immunocompromised 3rd dose any vaccine*/
 tab tested_syx vax_status_any3_0to13_thirdperd if immcomp==1
