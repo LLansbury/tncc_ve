@@ -1037,7 +1037,7 @@ recode vax2prenegtest_second_period 1=. if neg_syx!=1
 
 tab vax2prenegtest_second_period
 
-/*Two different time periods for neeg test after dose 1*/
+/*Two different time periods for neg test after dose 2*/
 
 gen vax2_neg_0to13_second_period=vax2prenegtest_second_period
 recode vax2_neg_0to13_second_period 1=. if timeneg_vax2==2
@@ -1473,7 +1473,7 @@ tab vax3_pos_14plus_third_period
 
 gen vax3prenegtest_third_period=negtestdate_third_period2-covid_vax_3_date2
 
-replace vax3prenegtest_third_period if timeperiod!=3
+replace vax3prenegtest_third_period=. if timeperiod!=3
 
 recode vax3prenegtest_third_period min/-1=.
 
